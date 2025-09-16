@@ -18,7 +18,7 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     public UserResponseDTO getUserByFirstName(String firstName) {
-        User user = userRepository.findByName(firstName).orElseThrow(() -> new UserNotFoundException("User not found"));
+        User user = userRepository.findByFirstName(firstName).orElseThrow(() -> new UserNotFoundException("User not found"));
         return new UserResponseDTO(user);
     }
 }

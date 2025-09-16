@@ -9,7 +9,7 @@ public class UserResponseDTO implements Serializable {
     private String lastName;
 
     public UserResponseDTO(User user) {
-        this.name = user.getName();
+        this.name = user.getFirstName();
         this.lastName = user.getLastName();
     }
 
