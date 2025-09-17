@@ -1,12 +1,11 @@
 package sk.mvp.user_service.controller;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import sk.mvp.user_service.dto.UserResponseDTO;
 import sk.mvp.user_service.service.IUserService;
+
+import java.util.List;
 
 @RestController
 @RequestMapping(value = "/users")
@@ -25,5 +24,11 @@ public class UserController {
     @GetMapping(value = "/by-email/{email}")
     public UserResponseDTO getUserByEmail(@PathVariable String email) {
         return userService.getUserByEmail(email);
+    }
+
+    @GetMapping(value = "/list")
+    public List<UserResponseDTO> getUsers(@RequestParam(defaultValue = "0") int page,
+                                          @RequestParam(defaultValue = "5") int size) {
+        return userService.getUsers(page, size);
     }
 }

@@ -1,9 +1,11 @@
 package sk.mvp.user_service.service;
 
 import sk.mvp.user_service.dto.UserResponseDTO;
-import sk.mvp.user_service.model.User;
+
+import java.util.List;
 
 public interface IUserService {
     UserResponseDTO getUserByFirstName(String firstName);
     UserResponseDTO getUserByEmail(String email);
+    List<UserResponseDTO> getUsers(int page, int rows);
 }
