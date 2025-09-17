@@ -5,8 +5,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import sk.mvp.user_service.dto.UserRequestDTO;
 import sk.mvp.user_service.dto.UserResponseDTO;
+import sk.mvp.user_service.exception.EmailAlreadyInUseException;
+import sk.mvp.user_service.exception.InvalidUserDataException;
 import sk.mvp.user_service.exception.UserNotFoundException;
+import sk.mvp.user_service.model.Contact;
+import sk.mvp.user_service.model.Gender;
 import sk.mvp.user_service.model.User;
 import sk.mvp.user_service.repository.UserRepository;
 
@@ -47,5 +52,39 @@ public class UserServiceImpl implements IUserService {
                .stream()
                .map(UserResponseDTO::new)
                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public UserResponseDTO saveUser(UserRequestDTO userRequestDTO) {
+        if (userRequestDTO == null) {
+            throw new InvalidUserDataException("Registration user data cannot be null");
+        }
+        //TODO: 2.check if it is email in good pattern using validator, regex ?? Bean validator
+        //1. check if email already exists
+        checkEmailIsNotUsed(userRequestDTO.getEmail());
+
+        // create new instance of user
+        Contact contact = new Contact(userRequestDTO.getEmail());
+        User user = new User(userRequestDTO.getUsername(),
+                userRequestDTO.getPassword(),
+                contact,
+                Gender.getValidGenderFromCode(userRequestDTO.getGenderCode()));
+        //set user to new contact
+        contact.setUser(user);
+        // save user to DB
+        User savedUser = userRepository.save(user);
+
+
+        return new UserResponseDTO(savedUser);
+    }
+
+    // check if emails is not used another user
+    private void checkEmailIsNotUsed(String email) throws EmailAlreadyInUseException {
+        Optional<User> user = userRepository.findByEmail(email);
+        if (user.isPresent()) {
+            throw new EmailAlreadyInUseException(String.format("Email %s is already in use", email));
+            // TODO: log error message
+        }
     }
 }

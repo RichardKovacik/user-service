@@ -26,6 +26,10 @@ public class Contact {
         this.phoneNumber = phoneNumber;
     }
 
+    public Contact(String email) {
+        this.email = email;
+    }
+
     public String getEmail() {
         return email;
     }
@@ -40,5 +44,13 @@ public class Contact {
 
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }

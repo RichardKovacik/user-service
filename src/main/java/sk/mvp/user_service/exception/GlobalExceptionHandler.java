@@ -16,7 +16,7 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorDetailsDTO, HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(InvalidGenderException.class)
+    @ExceptionHandler({InvalidGenderException.class, EmailAlreadyInUseException.class})
     public ResponseEntity<ErrorDetailsDTO> handleAsBadRequest(RuntimeException ex) {
         ErrorDetailsDTO errorDetailsDTO = new ErrorDetailsDTO(ex.getMessage());
         return new ResponseEntity<>(errorDetailsDTO, HttpStatus.BAD_REQUEST);
