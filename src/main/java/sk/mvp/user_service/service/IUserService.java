@@ -5,4 +5,5 @@ import sk.mvp.user_service.model.User;
 
 public interface IUserService {
     UserResponseDTO getUserByFirstName(String firstName);
+    UserResponseDTO getUserByEmail(String email);
 }

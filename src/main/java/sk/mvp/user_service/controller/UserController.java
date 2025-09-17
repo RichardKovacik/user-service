@@ -17,8 +17,13 @@ public class UserController {
         this.userService = userService;
     }
 
-    @GetMapping(value = "/{firstName}")
+    @GetMapping(value = "/by-name/{firstName}")
     public UserResponseDTO getUserByFirstName(@PathVariable String firstName) {
         return userService.getUserByFirstName(firstName);
+    }
+
+    @GetMapping(value = "/by-email/{email}")
+    public UserResponseDTO getUserByEmail(@PathVariable String email) {
+        return userService.getUserByEmail(email);
     }
 }

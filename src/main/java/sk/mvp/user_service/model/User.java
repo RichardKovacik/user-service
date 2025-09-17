@@ -33,6 +33,7 @@ public class User {
     private Contact contact;
 
     // constraint F alebo M
+    @Column(nullable = false)
     @Convert(converter = GenderConverter.class)
     private Gender gender;
 
