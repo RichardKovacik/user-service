@@ -44,6 +44,14 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
+    @Transactional
+    public UserResponseDTO getUserByUsername(String username) {
+        User user = userRepository.findByUsername(username).orElseThrow(() ->
+                new ApplicationException("User with username " + username + " not found", ErrorType.USER_NOT_FOUND, null));
+        return new UserResponseDTO(user);
+    }
+
+    @Override
     public List<UserResponseDTO> getUsers(int page, int rows) {
        Page<User> users = userRepository.findAll(PageRequest.of(page, rows));
        if (users.isEmpty()){
@@ -78,6 +86,18 @@ public class UserServiceImpl implements IUserService {
 
 
         return new UserResponseDTO(savedUser);
+    }
+
+    @Override
+    @Transactional
+    public void deleteUserbyUsername(String userName) {
+        if (userName == null || userName.isEmpty()) {
+            throw new IllegalArgumentException("User name cannot be null or empty");
+        }
+        User user = userRepository.findByUsername(userName).orElseThrow(() ->
+                new ApplicationException("User with username " + userName + " not found", ErrorType.USER_NOT_FOUND, null));
+        userRepository.delete(user);
+        //TODO: log user has been deleted
     }
 
     // check if emails is not used another user

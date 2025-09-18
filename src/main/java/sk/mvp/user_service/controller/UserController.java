@@ -28,6 +28,12 @@ public class UserController {
         return userService.getUserByEmail(email);
     }
 
+    @DeleteMapping(value = "delete/by-username/{username}")
+    public ResponseEntity<?> deleteUserByEmail(@PathVariable String username) {
+        userService.deleteUserbyUsername(username);
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping(value = "/list")
     public List<UserResponseDTO> getUsers(@RequestParam(defaultValue = "0") int page,
                                           @RequestParam(defaultValue = "5") int size) {
