@@ -1,10 +1,8 @@
 package sk.mvp.user_service.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import org.springframework.beans.factory.annotation.Value;
 import sk.mvp.user_service.util.GenderConverter;
+import java.util.Set;
 
 @Entity
 @Table(name = "users")
@@ -43,6 +41,13 @@ public class User {
     private boolean activated;
     @Column(name = "activation_token")
     private String activationToken;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "user_role",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id"))
+    private Set<Role> roles;
 
     public User() {
     }
@@ -124,5 +129,13 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public Set<Role> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Set<Role> roles) {
+        this.roles = roles;
     }
 }
