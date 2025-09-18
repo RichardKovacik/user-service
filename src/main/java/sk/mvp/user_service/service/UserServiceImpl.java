@@ -3,19 +3,16 @@ package sk.mvp.user_service.service;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import sk.mvp.user_service.dto.ErrorType;
 import sk.mvp.user_service.dto.UserRequestDTO;
 import sk.mvp.user_service.dto.UserResponseDTO;
-import sk.mvp.user_service.exception.EmailAlreadyInUseException;
-import sk.mvp.user_service.exception.InvalidUserDataException;
-import sk.mvp.user_service.exception.UserNotFoundException;
+import sk.mvp.user_service.exception.ApplicationException;
 import sk.mvp.user_service.model.Contact;
 import sk.mvp.user_service.model.Gender;
 import sk.mvp.user_service.model.User;
 import sk.mvp.user_service.repository.UserRepository;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -31,14 +28,18 @@ public class UserServiceImpl implements IUserService {
     @Override
     @Transactional
     public UserResponseDTO getUserByFirstName(String firstName) {
-        User user = userRepository.findByFirstName(firstName).orElseThrow(() -> new UserNotFoundException("User not found"));
+        User user = userRepository.findByFirstName(firstName).orElseThrow(() -> new ApplicationException(
+                String.format("User with firstName %s not found",
+                firstName),
+                ErrorType.USER_NOT_FOUND, null));
         return new UserResponseDTO(user);
     }
 
     @Override
     @Transactional
     public UserResponseDTO getUserByEmail(String email) {
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException("User with email " + email + " not found"));
+        User user = userRepository.findByEmail(email).orElseThrow(() ->
+                new ApplicationException("User with email " + email + " not found", ErrorType.USER_NOT_FOUND, null));
         return new UserResponseDTO(user);
     }
 
@@ -58,7 +59,7 @@ public class UserServiceImpl implements IUserService {
     @Transactional
     public UserResponseDTO saveUser(UserRequestDTO userRequestDTO) {
         if (userRequestDTO == null) {
-            throw new InvalidUserDataException("Registration user data cannot be null");
+            throw new IllegalArgumentException("Registration user data cannot be null");
         }
         //TODO: 2.check if it is email in good pattern using validator, regex ?? Bean validator
         //1. check if email already exists
@@ -69,7 +70,7 @@ public class UserServiceImpl implements IUserService {
         User user = new User(userRequestDTO.getUsername(),
                 userRequestDTO.getPassword(),
                 contact,
-                Gender.getValidGenderFromCode(userRequestDTO.getGenderCode()));
+                Gender.getValidGenderFromCode(userRequestDTO.getGenderCodeAsCharacter()));
         //set user to new contact
         contact.setUser(user);
         // save user to DB
@@ -80,11 +81,10 @@ public class UserServiceImpl implements IUserService {
     }
 
     // check if emails is not used another user
-    private void checkEmailIsNotUsed(String email) throws EmailAlreadyInUseException {
+    private void checkEmailIsNotUsed(String email) {
         Optional<User> user = userRepository.findByEmail(email);
         if (user.isPresent()) {
-            throw new EmailAlreadyInUseException(String.format("Email %s is already in use", email));
-            // TODO: log error message
+            throw new ApplicationException(String.format("Email %s is already in use", email), ErrorType.EMAIL_DUPLICATED, null);
         }
     }
 }

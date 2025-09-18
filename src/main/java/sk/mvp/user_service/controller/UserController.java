@@ -1,5 +1,6 @@
 package sk.mvp.user_service.controller;
 
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sk.mvp.user_service.dto.UserRequestDTO;
@@ -34,7 +35,7 @@ public class UserController {
     }
 
     @PostMapping(value = "/create")
-    public UserResponseDTO createUser(@RequestBody UserRequestDTO userRequestDTO) {
+    public UserResponseDTO createUser(@RequestBody @Valid UserRequestDTO userRequestDTO) {
         return userService.saveUser(userRequestDTO);
     }
 

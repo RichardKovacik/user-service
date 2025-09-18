@@ -1,7 +1,5 @@
 package sk.mvp.user_service.model;
 
-import sk.mvp.user_service.exception.InvalidGenderException;
-
 public enum Gender {
     MALE('M'),
     FEMALE('F');
@@ -21,7 +19,7 @@ public enum Gender {
                 return gender;
             }
         }
-        throw new InvalidGenderException(String.format("Invalid gender string %c. Are supported only: M or F characters", code));
+        throw new IllegalArgumentException(String.format("Invalid gender string %c. Are supported only: M or F characters", code));
 
     }
 }
