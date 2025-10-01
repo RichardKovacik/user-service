@@ -8,6 +8,7 @@ public class Error {
     private int statusCode;
     private String message;
     private String path;
+    //TODO: zmenit na UTC format
     private LocalDateTime timestamp;
     private Map<String, Object> data;
 
