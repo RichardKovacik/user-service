@@ -84,7 +84,6 @@ public class UserServiceImpl implements IUserService {
         // save user to DB
         User savedUser = userRepository.save(user);
 
-
         return new UserResponseDTO(savedUser);
     }
 

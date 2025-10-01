@@ -20,14 +20,12 @@ public class GlobalExceptionHandler {
     // handle custom application exceptions
     @ExceptionHandler(ApplicationException.class)
     public ResponseEntity<QErrorResponseDTO> handleCustomAplicationException(ApplicationException ex, HttpServletRequest request) {
-        // TODO: log error
         return createQErrorResponse(ex.getErrorType(), ex.getMessage(), request.getRequestURI(), ex.getData());
     }
 
     // handle default runtime exceptions
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<QErrorResponseDTO> handleOtherRuntime(RuntimeException ex, HttpServletRequest request) {
-        // TODO: log error
         return createQErrorResponse(ErrorType.INTERNAL_SERVER_ERROR, ex.getMessage(), request.getRequestURI(), null);
     }
 

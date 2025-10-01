@@ -1,10 +1,7 @@
 package sk.mvp.user_service.logging;
 
 import org.aspectj.lang.JoinPoint;
-import org.aspectj.lang.annotation.AfterThrowing;
-import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Before;
-import org.aspectj.lang.annotation.Pointcut;
+import org.aspectj.lang.annotation.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -16,32 +13,38 @@ import java.util.Arrays;
 @Component
 // Used for logging in business layer
 public class LoggingAspect {
+    private static final Logger logger = LoggerFactory.getLogger(LoggingAspect.class);
     private static final String CORRELATION_ID_HEADER = "X-Correlation-Id";
 
-    // Pointcut pre controller
-    @Pointcut("execution(* sk.mvp.user_service.controller..*(..))")
-    public void controllerMethods() {}
+    // Pointcut pre controller (na kotre metody sa ma aplikovat
+    @Pointcut("execution(* sk.mvp.user_service.service..*(..))")
+    public void serviceMethods() {}
 
-    // ---------------- Controller ----------------
+    // Pred spustením
+    @Before("serviceMethods()")
+    public void logBefore(JoinPoint joinPoint) {
+        String correlationId = MDC.get(CORRELATION_ID_HEADER);
+        logger.info("[{}] [SERVICE] Entering method: {} with args: {}",
+                correlationId,
+                joinPoint.getSignature().toShortString(),
+                Arrays.toString(joinPoint.getArgs()));
+    }
 
-//    @Before("controllerMethods()")
-//    public void logControllerEntry(JoinPoint joinPoint) {
-//        Logger logger = LoggerFactory.getLogger(joinPoint.getTarget().getClass());
-//        logger.info("[CONTROLLER] Incoming request: {} with input payload: {}",
-//                joinPoint.getSignature().toShortString(),
-//                Arrays.toString(joinPoint.getArgs()));
-//    }
+    // Po úspešnom návrate
+    @AfterReturning(pointcut = "serviceMethods()", returning = "result")
+    public void logAfterReturning(JoinPoint joinPoint, Object result) {
+        String correlationId = MDC.get(CORRELATION_ID_HEADER);
+        logger.info("[{}] [SERVICE] Exiting method: {} with result: {}",
+                correlationId,
+                joinPoint.getSignature().toShortString(),
+                result);
+    }
 
-//    @AfterThrowing(pointcut = "controllerMethods()", throwing = "ex")
-//    public void logControllerException(JoinPoint joinPoint, Exception ex) {
-//        Logger logger = LoggerFactory.getLogger(joinPoint.getTarget().getClass());
-//        logger.error("[CONTROLLER] Exception in request: {} with args: {}. Exception: {}", joinPoint.getSignature().toShortString(), Arrays.toString(joinPoint.getArgs()), ex.toString());
-//    }
-    @AfterThrowing(pointcut = "controllerMethods()", throwing = "ex")
+    @AfterThrowing(pointcut = "serviceMethods()", throwing = "ex")
     public void logControllerException(JoinPoint joinPoint, Exception ex) {
         String correlationId = MDC.get(CORRELATION_ID_HEADER);
-        Logger logger = LoggerFactory.getLogger(joinPoint.getTarget().getClass());
-        logger.error("[CONTROLLER] [{}] Exception in method: {} with args: {}. Exception: {}",
+
+        logger.error("[{}] [SERVICE] Exception in method: {} with args: {}. Exception: {}",
                 correlationId,
                 joinPoint.getSignature().toShortString(),
                 Arrays.toString(joinPoint.getArgs()),
