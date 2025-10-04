@@ -12,4 +12,6 @@ public interface IUserService {
     List<UserResponseDTO> getUsers(int page, int rows);
     UserResponseDTO saveUser(UserRequestDTO user);
     void deleteUserbyUsername(String userName);
+    void assignRoleToUser(String username, String roleName);
+    void unassignRoleFromUser(String username, String roleName);
 }

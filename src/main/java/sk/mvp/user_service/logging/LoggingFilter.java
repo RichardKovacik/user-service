@@ -28,7 +28,7 @@ public class LoggingFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         // loguj len endpointy začínajúce /api
-        if (!request.getRequestURI().startsWith("/users")) {
+        if (!request.getRequestURI().startsWith("/api")) {
             filterChain.doFilter(request, response);
             return;
         }

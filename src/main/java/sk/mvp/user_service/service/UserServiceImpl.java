@@ -10,7 +10,9 @@ import sk.mvp.user_service.dto.UserResponseDTO;
 import sk.mvp.user_service.exception.ApplicationException;
 import sk.mvp.user_service.model.Contact;
 import sk.mvp.user_service.model.Gender;
+import sk.mvp.user_service.model.Role;
 import sk.mvp.user_service.model.User;
+import sk.mvp.user_service.repository.RoleRepository;
 import sk.mvp.user_service.repository.UserRepository;
 
 import java.util.List;
@@ -20,9 +22,11 @@ import java.util.stream.Collectors;
 @Service
 public class UserServiceImpl implements IUserService {
     private UserRepository userRepository;
+    private RoleRepository roleRepository;
 
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository) {
         this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
     }
 
     @Override
@@ -97,6 +101,53 @@ public class UserServiceImpl implements IUserService {
                 new ApplicationException("User with username " + userName + " not found", ErrorType.USER_NOT_FOUND, null));
         userRepository.delete(user);
         //TODO: log user has been deleted
+    }
+
+    @Override
+    public void assignRoleToUser(String username, String roleName) {
+        if (username == null || username.isEmpty()) {
+            throw new IllegalArgumentException("User name cannot be null or empty");
+        }
+        if (roleName == null || roleName.isEmpty()) {
+            throw new IllegalArgumentException("Role name cannot be null or empty");
+        }
+
+        User user = userRepository.findByUsername(username).orElseThrow(() ->
+                new ApplicationException("User with username " + username + " not found", ErrorType.USER_NOT_FOUND, null));
+
+        Role role = roleRepository.findByName(roleName).orElseThrow(
+                () -> new ApplicationException("Role with name " + roleName + " not found", ErrorType.ROLE_NOT_FOUND, null));
+
+        if (user.getRoles().contains(role)) {
+            throw new ApplicationException(String.format("User %s already has %s role", username, roleName), ErrorType.ROLE_ALREADY_ASSIGNED, null);
+        }
+
+        user.getRoles().add(role);
+
+        userRepository.save(user);
+    }
+
+    @Override
+    public void unassignRoleFromUser(String username, String roleName) {
+        if (username == null || username.isEmpty()) {
+            throw new IllegalArgumentException("User name cannot be null or empty");
+        }
+        if (roleName == null || roleName.isEmpty()) {
+            throw new IllegalArgumentException("Role name cannot be null or empty");
+        }
+
+        User user = userRepository.findByUsername(username).orElseThrow(() ->
+                new ApplicationException("User with username " + username + " not found", ErrorType.USER_NOT_FOUND, null));
+
+        Role role = roleRepository.findByName(roleName).orElseThrow(
+                () -> new ApplicationException("Role with name " + roleName + "not found", ErrorType.ROLE_NOT_FOUND, null));
+
+        if (!user.getRoles().contains(role)) {
+            throw new RuntimeException("User does not have this role");
+        }
+        user.getRoles().remove(role);
+
+        userRepository.save(user);
     }
 
     // check if emails is not used another user

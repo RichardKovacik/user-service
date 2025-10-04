@@ -8,6 +8,7 @@ public class UserResponseDTO implements Serializable {
     private String email;
     private String firstName;
     private String lastName;
+    private String username;
     private char genderCode;
 
     public UserResponseDTO(User user) {
@@ -16,6 +17,7 @@ public class UserResponseDTO implements Serializable {
             this.lastName = user.getLastName();
             this.genderCode = user.getGender().getCode();
             this.email = null;
+            this.username = user.getUsername();
             if (user.getContact() != null) {
                 this.email = user.getContact().getEmail();
             }
@@ -36,5 +38,13 @@ public class UserResponseDTO implements Serializable {
 
     public String getEmail() {
         return email;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 }
