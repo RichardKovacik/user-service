@@ -1,17 +1,19 @@
 package sk.mvp.user_service.service;
 
-import sk.mvp.user_service.dto.UserRequestDTO;
-import sk.mvp.user_service.dto.UserResponseDTO;
+import sk.mvp.user_service.dto.user.UserCreateDTO;
+import sk.mvp.user_service.dto.user.UserProfileDTO;
+import sk.mvp.user_service.dto.user.UserSummaryDTO;
 
 import java.util.List;
 
 public interface IUserService {
-    UserResponseDTO getUserByFirstName(String firstName);
-    UserResponseDTO getUserByEmail(String email);
-    UserResponseDTO getUserByUsername(String username);
-    List<UserResponseDTO> getUsers(int page, int rows);
-    UserResponseDTO saveUser(UserRequestDTO user);
+    UserProfileDTO getUserByFirstName(String firstName);
+    UserProfileDTO getUserByEmail(String email);
+    UserProfileDTO getUserByUsername(String username);
+    List<UserSummaryDTO> getUsers(int page, int rows);
+    UserProfileDTO saveUser(UserCreateDTO user);
     void deleteUserbyUsername(String userName);
     void assignRoleToUser(String username, String roleName);
     void unassignRoleFromUser(String username, String roleName);
+    List<UserSummaryDTO> getUsersByGender(int page, int rows, String gender);
 }

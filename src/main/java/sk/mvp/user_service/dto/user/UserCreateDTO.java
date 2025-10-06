@@ -1,10 +1,10 @@
-package sk.mvp.user_service.dto;
+package sk.mvp.user_service.dto.user;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
-public class UserRequestDTO {
+public class UserCreateDTO {
 
     @NotBlank(message = "Username is required")
     @Size(min = 3, max = 50)
@@ -19,7 +19,7 @@ public class UserRequestDTO {
     private String genderCode;// F or M
     // TODO: dorobit validaciu vstupu registracie tieto 4 paramtre povinne spring bean validation
 
-    public UserRequestDTO(String username, String password, String email, String genderCode) {
+    public UserCreateDTO(String username, String password, String email, String genderCode) {
         this.username = username;
         this.password = password;
         this.email = email;

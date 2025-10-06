@@ -5,13 +5,15 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import sk.mvp.user_service.dto.ErrorType;
-import sk.mvp.user_service.dto.UserRequestDTO;
-import sk.mvp.user_service.dto.UserResponseDTO;
+import sk.mvp.user_service.dto.user.UserCreateDTO;
+import sk.mvp.user_service.dto.user.UserProfileDTO;
+import sk.mvp.user_service.dto.user.UserSummaryDTO;
 import sk.mvp.user_service.exception.ApplicationException;
 import sk.mvp.user_service.model.Contact;
 import sk.mvp.user_service.model.Gender;
 import sk.mvp.user_service.model.Role;
 import sk.mvp.user_service.model.User;
+import sk.mvp.user_service.projections.UserSummaryProjection;
 import sk.mvp.user_service.repository.RoleRepository;
 import sk.mvp.user_service.repository.UserRepository;
 
@@ -31,64 +33,64 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     @Transactional
-    public UserResponseDTO getUserByFirstName(String firstName) {
+    public UserProfileDTO getUserByFirstName(String firstName) {
         User user = userRepository.findByFirstName(firstName).orElseThrow(() -> new ApplicationException(
                 String.format("User with firstName %s not found",
                 firstName),
                 ErrorType.USER_NOT_FOUND, null));
-        return new UserResponseDTO(user);
+        return new UserProfileDTO(user);
     }
 
     @Override
     @Transactional
-    public UserResponseDTO getUserByEmail(String email) {
+    public UserProfileDTO getUserByEmail(String email) {
         User user = userRepository.findByEmail(email).orElseThrow(() ->
                 new ApplicationException("User with email " + email + " not found", ErrorType.USER_NOT_FOUND, null));
-        return new UserResponseDTO(user);
+        return new UserProfileDTO(user);
     }
 
     @Override
     @Transactional
-    public UserResponseDTO getUserByUsername(String username) {
+    public UserProfileDTO getUserByUsername(String username) {
         User user = userRepository.findByUsername(username).orElseThrow(() ->
                 new ApplicationException("User with username " + username + " not found", ErrorType.USER_NOT_FOUND, null));
-        return new UserResponseDTO(user);
+        return new UserProfileDTO(user);
     }
 
     @Override
-    public List<UserResponseDTO> getUsers(int page, int rows) {
-       Page<User> users = userRepository.findAll(PageRequest.of(page, rows));
+    public List<UserSummaryDTO> getUsers(int page, int rows) {
+       Page<UserSummaryProjection> users = userRepository.findAllProjectedBy(PageRequest.of(page, rows));
        if (users.isEmpty()){
            return List.of();
        }
        return users.getContent()
                .stream()
-               .map(UserResponseDTO::new)
+               .map(UserSummaryDTO::new)
                .collect(Collectors.toList());
     }
 
     @Override
     @Transactional
-    public UserResponseDTO saveUser(UserRequestDTO userRequestDTO) {
-        if (userRequestDTO == null) {
+    public UserProfileDTO saveUser(UserCreateDTO userCreateDTO) {
+        if (userCreateDTO == null) {
             throw new IllegalArgumentException("Registration user data cannot be null");
         }
         //TODO: 2.check if it is email in good pattern using validator, regex ?? Bean validator
         //1. check if email already exists
-        checkEmailIsNotUsed(userRequestDTO.getEmail());
+        checkEmailIsNotUsed(userCreateDTO.getEmail());
 
         // create new instance of user
-        Contact contact = new Contact(userRequestDTO.getEmail());
-        User user = new User(userRequestDTO.getUsername(),
-                userRequestDTO.getPassword(),
+        Contact contact = new Contact(userCreateDTO.getEmail());
+        User user = new User(userCreateDTO.getUsername(),
+                userCreateDTO.getPassword(),
                 contact,
-                Gender.getValidGenderFromCode(userRequestDTO.getGenderCodeAsCharacter()));
+                Gender.getValidGenderFromCode(userCreateDTO.getGenderCodeAsCharacter()));
         //set user to new contact
         contact.setUser(user);
         // save user to DB
         User savedUser = userRepository.save(user);
 
-        return new UserResponseDTO(savedUser);
+        return new UserProfileDTO(savedUser);
     }
 
     @Override
@@ -148,6 +150,24 @@ public class UserServiceImpl implements IUserService {
         user.getRoles().remove(role);
 
         userRepository.save(user);
+    }
+
+    @Override
+    public List<UserSummaryDTO> getUsersByGender(int page, int rows, String gender) {
+        if (gender == null || gender.isEmpty()) {
+            throw new IllegalArgumentException("Gender cannot be null or empty");
+        }
+
+        char genderCode = Character.toUpperCase(gender.charAt(0));
+
+        Page<UserSummaryProjection> users = userRepository.findAllByGender(Gender.getValidGenderFromCode(genderCode), PageRequest.of(page, rows));
+        if (users.isEmpty()){
+            return List.of();
+        }
+        return users.getContent()
+                .stream()
+                .map(UserSummaryDTO::new)
+                .collect(Collectors.toList());
     }
 
     // check if emails is not used another user

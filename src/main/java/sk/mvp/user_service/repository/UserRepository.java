@@ -5,7 +5,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import sk.mvp.user_service.model.Gender;
 import sk.mvp.user_service.model.User;
+import sk.mvp.user_service.projections.UserSummaryProjection;
 
 import java.util.Optional;
 
@@ -16,9 +18,10 @@ public interface UserRepository extends JpaRepository <User, Long> {
     @Query("select u from User u JOIN u.contact c where c.email = :email")
     Optional<User> findByEmail(String email);
 
-    Page<User> findAll(Pageable pageable);
-
     User save(User user);
 
     void delete(User user);
+
+    Page<UserSummaryProjection> findAllProjectedBy(Pageable pageable);
+    Page<UserSummaryProjection> findAllByGender(Gender gender, Pageable pageable);
 }
