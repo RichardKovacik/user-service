@@ -162,6 +162,28 @@ public class UserServiceImpl implements IUserService {
         userRepository.save(user);
     }
 
+    @Transactional
+    @Override
+    public void updateUserProfile(String userName, UserProfileDTO userProfileDTO) {
+        if (userName == null || userName.isEmpty()) {
+            throw new IllegalArgumentException("User name cannot be null or empty");
+        }
+        User user = userRepository.findByUsername(userName).orElseThrow(() ->
+                new ApplicationException("User with username " + userName + " not found", ErrorType.USER_NOT_FOUND, null));
+
+        if (userProfileDTO.getFirstName() != null || userProfileDTO.getFirstName().isEmpty()) {
+            user.setFirstName(userProfileDTO.getFirstName());
+        }
+        if (userProfileDTO.getLastName() != null || userProfileDTO.getLastName().isEmpty()) {
+            user.setLastName(userProfileDTO.getLastName());
+        }
+
+
+
+        userRepository.save(user);
+
+    }
+
     @Override
     public List<UserSummaryDTO> getUsersByGender(int page, int rows, String gender) {
         if (gender == null || gender.isEmpty()) {

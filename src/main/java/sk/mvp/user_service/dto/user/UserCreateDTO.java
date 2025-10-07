@@ -3,6 +3,8 @@ package sk.mvp.user_service.dto.user;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import sk.mvp.user_service.dto.ConcatDTO;
+import sk.mvp.user_service.model.User;
 
 public class UserCreateDTO {
 

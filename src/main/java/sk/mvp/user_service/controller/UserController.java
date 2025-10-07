@@ -60,4 +60,11 @@ public class UserController {
         return userService.saveUser(userCreateDTO);
     }
 
+    @PatchMapping(value = "/update/{username}")
+    public ResponseEntity<?> updateUserProfileData(@PathVariable String username,
+                                                  @RequestBody @Valid UserProfileDTO userProfileDTO) {
+        userService.updateUserProfile(username, userProfileDTO);
+        return ResponseEntity.ok().build();
+    }
+
 }

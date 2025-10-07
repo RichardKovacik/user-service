@@ -16,5 +16,6 @@ public interface IUserService {
     void deleteUserbyEmailOptimized(String email);
     void assignRoleToUser(String username, String roleName);
     void unassignRoleFromUser(String username, String roleName);
+    void updateUserProfile(String userName, UserProfileDTO userProfileDTO);
     List<UserSummaryDTO> getUsersByGender(int page, int rows, String gender);
 }
