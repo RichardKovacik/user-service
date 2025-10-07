@@ -13,6 +13,7 @@ public interface IUserService {
     List<UserSummaryDTO> getUsers(int page, int rows);
     UserProfileDTO saveUser(UserCreateDTO user);
     void deleteUserbyUsername(String userName);
+    void deleteUserbyEmailOptimized(String email);
     void assignRoleToUser(String username, String roleName);
     void unassignRoleFromUser(String username, String roleName);
     List<UserSummaryDTO> getUsersByGender(int page, int rows, String gender);

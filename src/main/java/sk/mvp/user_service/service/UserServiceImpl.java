@@ -106,6 +106,16 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
+    @Transactional
+    public void deleteUserbyEmailOptimized(String email) {
+        if(email == null || email.isEmpty()) {
+            throw new IllegalArgumentException("User email cannot be null or empty");
+        }
+
+        userRepository.deleteUserByEmail(email);
+    }
+
+    @Override
     public void assignRoleToUser(String username, String roleName) {
         if (username == null || username.isEmpty()) {
             throw new IllegalArgumentException("User name cannot be null or empty");

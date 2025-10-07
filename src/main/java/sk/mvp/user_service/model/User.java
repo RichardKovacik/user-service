@@ -39,6 +39,7 @@ public class User {
     private Gender gender;
 
     private boolean activated;
+
     @Column(name = "activation_token")
     private String activationToken;
 

@@ -30,10 +30,17 @@ public class UserController {
     }
 
     @DeleteMapping(value = "delete/by-username/{username}")
-    public ResponseEntity<?> deleteUserByEmail(@PathVariable String username) {
+    public ResponseEntity<?> deleteUserByUserName(@PathVariable String username) {
         userService.deleteUserbyUsername(username);
         return ResponseEntity.ok().build();
     }
+
+    @DeleteMapping(value = "delete/by-email/{username}")
+    public ResponseEntity<?> deleteUserByEmailOptimized(@PathVariable String username) {
+        userService.deleteUserbyEmailOptimized(username);
+        return ResponseEntity.ok().build();
+    }
+
 
     @GetMapping(value = "/list")
     public List<UserSummaryDTO> getUsers(@RequestParam(defaultValue = "0") int page,
