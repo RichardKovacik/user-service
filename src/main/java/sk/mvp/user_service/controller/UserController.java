@@ -1,9 +1,11 @@
 package sk.mvp.user_service.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sk.mvp.user_service.dto.user.UserCreateDTO;
+import sk.mvp.user_service.dto.user.UserLoginDTO;
 import sk.mvp.user_service.dto.user.UserProfileDTO;
 import sk.mvp.user_service.dto.user.UserSummaryDTO;
 import sk.mvp.user_service.service.IUserService;
@@ -17,6 +19,12 @@ public class UserController {
 
     public UserController(IUserService userService) {
         this.userService = userService;
+    }
+
+    @PostMapping(value = "/login")
+    public ResponseEntity<?> login(@RequestBody @Valid UserLoginDTO userLoginDTO, HttpServletRequest request) {
+        userService.loginUser(userLoginDTO, request);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping(value = "/by-name/{firstName}")

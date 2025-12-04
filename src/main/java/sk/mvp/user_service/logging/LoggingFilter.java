@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -64,8 +65,17 @@ public class LoggingFilter extends OncePerRequestFilter {
         for (String headerName : Collections.list(headerNames)) {
             headers.append(headerName).append("=").append(request.getHeader(headerName)).append("; ");
         }
+        HttpSession session = request.getSession(false);
+        String sessionId = (session != null) ? session.getId() : "no-session";
+
         String body = new String(request.getCachedPayload(), StandardCharsets.UTF_8);
-        log.info("[{}] Incoming Request [{} {}], headers=[{}], body={}", correlationId, request.getMethod(), request.getRequestURI(), headers, body);
+        log.info("[{}] Incoming Request [{} {}], sessionId={}, headers=[{}], body={}",
+                correlationId,
+                request.getMethod(),
+                request.getRequestURI(),
+                sessionId,
+                headers,
+                body);
     }
 
     private void logResponse(ContentCachingResponseWrapper response, String correlationId) throws IOException {

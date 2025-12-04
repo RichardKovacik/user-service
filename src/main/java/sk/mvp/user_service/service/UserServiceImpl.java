@@ -1,11 +1,20 @@
 package sk.mvp.user_service.service;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.stereotype.Service;
 import sk.mvp.user_service.dto.ErrorType;
 import sk.mvp.user_service.dto.user.UserCreateDTO;
+import sk.mvp.user_service.dto.user.UserLoginDTO;
 import sk.mvp.user_service.dto.user.UserProfileDTO;
 import sk.mvp.user_service.dto.user.UserSummaryDTO;
 import sk.mvp.user_service.exception.ApplicationException;
@@ -25,10 +34,35 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements IUserService {
     private UserRepository userRepository;
     private RoleRepository roleRepository;
+    private AuthenticationManager authenticationManager;
 
-    public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository) {
+    public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository,
+                           AuthenticationManager authenticationManager) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
+        this.authenticationManager = authenticationManager;
+    }
+
+    @Override
+    public void loginUser(UserLoginDTO userLoginDTO, HttpServletRequest request) {
+        Authentication auth = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        userLoginDTO.username(),
+                        userLoginDTO.password()
+                )
+        );
+
+        // nastavíme authentication do SecurityContext
+        SecurityContext context = SecurityContextHolder.createEmptyContext();
+        context.setAuthentication(auth);
+        SecurityContextHolder.setContext(context);
+
+        HttpSession session = request.getSession(true);
+
+        session.setAttribute(
+                HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
+                context
+        );
     }
 
     @Override

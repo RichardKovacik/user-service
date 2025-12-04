@@ -139,4 +139,10 @@ public class User {
     public void setRoles(Set<Role> roles) {
         this.roles = roles;
     }
+
+    public String[] getRolesAsString() {
+        return this.getRoles().stream()
+                .map(Role::getName)
+                .toArray(String[]::new);
+    }
 }
