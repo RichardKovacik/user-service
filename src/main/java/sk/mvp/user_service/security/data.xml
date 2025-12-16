@@ -1,0 +1,96 @@
+<orderExecutionHeader>
+    <rootRequestId>6d496b11-d029-11f0-9a56-4d022dc172c5</rootRequestId>
+    <feProcessId>9ed31258-98af-4072-840f-81d38ebfd664</feProcessId>
+    <applicationId>591499981031225</applicationId>
+    <requestDate>2025-12-03T11:36:15.646+01:00</requestDate>
+</orderExecutionHeader><pointOfService>
+<electronic>
+    <channelId>DGM</channelId>
+</electronic>
+</pointOfService><accountOwner>
+<partyId>5852096118~^~CIS</partyId>
+<firstName>Edita</firstName>
+<lastName>Balážová</lastName>
+<personalNumber>5852096118</personalNumber>
+<birthDate>1958-02-09+01:00</birthDate>
+<mobilePhoneNumber>421902620995</mobilePhoneNumber>
+<bankEmployee>false</bankEmployee>
+<taxDomicileCountry>SK</taxDomicileCountry>
+<taxDomicileDeclared>false</taxDomicileDeclared>
+<resident>true</resident>
+<permission>
+    <productRole>MAJ</productRole>
+</permission>
+<packagePrimaryOwner>true</packagePrimaryOwner>
+<permanentAddress>
+    <addressId>5852096118CR</addressId>
+    <addressLine>VAVILOVOVA 1141/5</addressLine>
+    <city>BRATISLAVA</city>
+    <postalCode>85101</postalCode>
+    <countryCode>SK</countryCode>
+</permanentAddress>
+<correspondenceAddress>
+    <addressId>5852096118DF</addressId>
+    <addressLine>VAVILOVOVA 1141/5</addressLine>
+    <city>BRATISLAVA</city>
+    <postalCode>85101</postalCode>
+    <countryCode>SK</countryCode>
+</correspondenceAddress>
+</accountOwner><currentAccount>
+<packageCode>PKG002</packageCode>
+<businessProductCode>IDS004</businessProductCode>
+<productSalesCode>CA302</productSalesCode>
+<productSalesName>VÚB účet Klasik</productSalesName>
+<accountNumber>1217612758</accountNumber>
+<accountNumberIban>SK4102000000001217612758</accountNumberIban>
+<productInstanceId>1217612758~^~IDS~^~OD_S_CONTR</productInstanceId>
+<ppmProductInstanceId>AKQ9PZG7L</ppmProductInstanceId>
+<currencyCode>EUR</currencyCode>
+<benefit>
+    <benefitCode>CA_BEN_PROG</benefitCode>
+    <benefitName>Zahrnutie účtu do benefitného programu</benefitName>
+    <benefitCategory>CA_LOYALTY_1</benefitCategory>
+    <discountPerc>0</discountPerc>
+</benefit>
+<benefit>
+    <benefitCode>CA_LOY_PROG</benefitCode>
+    <benefitName>Zahrnutie účtu do flexizľava programu</benefitName>
+    <benefitCategory>CA_LOYALTY_2</benefitCategory>
+    <discountPerc>0</discountPerc>
+</benefit>
+<benefit>
+    <benefitCode>CA_LOY_PROG_ELIG</benefitCode>
+    <benefitName>Splnený nárok na lojalitnú zľavu</benefitName>
+    <benefitCategory>CA_TECHNICAL</benefitCategory>
+    <discountPerc>100</discountPerc>
+</benefit>
+<benefit>
+    <benefitCode>CA_ROUNDUP_E1</benefitCode>
+</benefit>
+</currentAccount><savingsAccountCreation>
+<product>
+    <packageCode>PKG002</packageCode>
+    <businessProductCode>IDS248</businessProductCode>
+    <productSalesCode>SA301</productSalesCode>
+    <productSalesName>Pravidelné sporenie</productSalesName>
+    <currencyCode>EUR</currencyCode>
+</product>
+<benefits>
+    <benefitCode>SA_WITHSAVE</benefitCode>
+    <benefitName>Pravidelné sporenie</benefitName>
+    <benefitCategory>SA_SECONDARY</benefitCategory>
+</benefits>
+<statementSetting>
+    <frequency>Mesacne_ultim_mesiac</frequency>
+    <deliverToInternetBanking>true</deliverToInternetBanking>
+    <deliverToBranch>false</deliverToBranch>
+    <branchDeliveryMethod>Internet Banking</branchDeliveryMethod>
+</statementSetting>
+</savingsAccountCreation><contractAmendment>
+<dmsProcessFolder>
+    <folderId>idf_C67719A9-BC15-4A19-B793-3D67CC7F4057</folderId>
+    <objectStoreName>VUB</objectStoreName>
+</dmsProcessFolder>
+<serviceType>ApplicationSavings</serviceType>
+<contractNumber>591499981031225</contractNumber>
+</contractAmendment>

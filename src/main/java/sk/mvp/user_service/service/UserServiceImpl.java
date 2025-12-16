@@ -10,6 +10,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.stereotype.Service;
 import sk.mvp.user_service.dto.ErrorType;
@@ -35,12 +36,15 @@ public class UserServiceImpl implements IUserService {
     private UserRepository userRepository;
     private RoleRepository roleRepository;
     private AuthenticationManager authenticationManager;
+    private final SessionRegistry sessionRegistry;
 
     public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository,
-                           AuthenticationManager authenticationManager) {
+                           AuthenticationManager authenticationManager,
+                           SessionRegistry sessionRegistry) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.authenticationManager = authenticationManager;
+        this.sessionRegistry = sessionRegistry;
     }
 
     @Override
@@ -63,6 +67,8 @@ public class UserServiceImpl implements IUserService {
                 HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
                 context
         );
+        // register new session to sesion registry
+        sessionRegistry.registerNewSession(session.getId(), auth.getPrincipal());
     }
 
     @Override
