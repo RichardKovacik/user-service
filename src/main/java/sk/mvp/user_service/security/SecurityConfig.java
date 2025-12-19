@@ -12,6 +12,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
 
 @Configuration
@@ -20,7 +21,15 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, SessionRegistry sessionRegistry) throws Exception {
         http
-                .csrf(csrf -> csrf.disable()) // pre jednoduché REST login; v produkcii riešiť bezpečne
+                // csfr simple config
+                .csrf(csrf -> csrf
+                        .csrfTokenRepository(
+                                CookieCsrfTokenRepository.withHttpOnlyFalse()
+                        )
+                        .ignoringRequestMatchers(
+                                "/api/users/login"
+                        )
+                )// pre jednoduché REST login; v produkcii riešiť bezpečne
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/users/login", "/login/**").permitAll()
                         .requestMatchers("/api/admin/sessions").hasRole("ADMIN")

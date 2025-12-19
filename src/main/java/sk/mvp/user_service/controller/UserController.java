@@ -3,6 +3,7 @@ package sk.mvp.user_service.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.web.bind.annotation.*;
 import sk.mvp.user_service.dto.user.UserCreateDTO;
 import sk.mvp.user_service.dto.user.UserLoginDTO;
@@ -21,6 +22,16 @@ public class UserController {
         this.userService = userService;
     }
 
+    @GetMapping("/get/token")
+    public ResponseEntity<?> getToken(HttpServletRequest request) {
+        CsrfToken token = (CsrfToken) request.getAttribute(CsrfToken.class.getName());
+        if (token != null) {
+            System.out.println("CSRF Token: " + token.getToken());  // alebo log.debug
+        }
+        // tvoja logika
+        assert token != null;
+        return ResponseEntity.ok().body(token.getToken());
+    }
     @PostMapping(value = "/login")
     public ResponseEntity<?> login(@RequestBody @Valid UserLoginDTO userLoginDTO, HttpServletRequest request) {
         userService.loginUser(userLoginDTO, request);
