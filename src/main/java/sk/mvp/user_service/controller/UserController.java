@@ -5,10 +5,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.web.bind.annotation.*;
-import sk.mvp.user_service.dto.user.UserCreateDTO;
-import sk.mvp.user_service.dto.user.UserLoginDTO;
-import sk.mvp.user_service.dto.user.UserProfileDTO;
-import sk.mvp.user_service.dto.user.UserSummaryDTO;
+import sk.mvp.user_service.dto.user.*;
 import sk.mvp.user_service.service.IUserService;
 
 import java.util.List;
@@ -33,9 +30,8 @@ public class UserController {
         return ResponseEntity.ok().body(token.getToken());
     }
     @PostMapping(value = "/login")
-    public ResponseEntity<?> login(@RequestBody @Valid UserLoginDTO userLoginDTO, HttpServletRequest request) {
-        userService.loginUser(userLoginDTO, request);
-        return ResponseEntity.ok().build();
+    public UserLoginRespDTO login(@RequestBody @Valid UserLoginReqDTO userLoginReqDTO, HttpServletRequest request) {
+       return userService.loginUser(userLoginReqDTO, request);
     }
 
     @GetMapping(value = "/by-name/{firstName}")

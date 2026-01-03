@@ -1,23 +1,17 @@
 package sk.mvp.user_service.service;
 
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.session.SessionRegistry;
-import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import sk.mvp.user_service.dto.ErrorType;
-import sk.mvp.user_service.dto.user.UserCreateDTO;
-import sk.mvp.user_service.dto.user.UserLoginDTO;
-import sk.mvp.user_service.dto.user.UserProfileDTO;
-import sk.mvp.user_service.dto.user.UserSummaryDTO;
+import sk.mvp.user_service.dto.user.*;
 import sk.mvp.user_service.exception.ApplicationException;
 import sk.mvp.user_service.model.Contact;
 import sk.mvp.user_service.model.Gender;
@@ -26,6 +20,7 @@ import sk.mvp.user_service.model.User;
 import sk.mvp.user_service.projections.UserSummaryProjection;
 import sk.mvp.user_service.repository.RoleRepository;
 import sk.mvp.user_service.repository.UserRepository;
+import sk.mvp.user_service.security.JwtUtil;
 
 import java.util.List;
 import java.util.Optional;
@@ -37,38 +32,29 @@ public class UserServiceImpl implements IUserService {
     private RoleRepository roleRepository;
     private AuthenticationManager authenticationManager;
     private final SessionRegistry sessionRegistry;
+    private JwtUtil jwtUtil;
 
     public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository,
                            AuthenticationManager authenticationManager,
-                           SessionRegistry sessionRegistry) {
+                           SessionRegistry sessionRegistry, JwtUtil jwtUtil) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.authenticationManager = authenticationManager;
         this.sessionRegistry = sessionRegistry;
+        this.jwtUtil = jwtUtil;
     }
 
     @Override
-    public void loginUser(UserLoginDTO userLoginDTO, HttpServletRequest request) {
+    public UserLoginRespDTO loginUser(UserLoginReqDTO userLoginReqDTO, HttpServletRequest request) {
+        //prebhene autetifikacia najdenie usera, provnanei hesla
         Authentication auth = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        userLoginDTO.username(),
-                        userLoginDTO.password()
+                        userLoginReqDTO.username(),
+                        userLoginReqDTO.password()
                 )
         );
-
-        // nastavíme authentication do SecurityContext
-        SecurityContext context = SecurityContextHolder.createEmptyContext();
-        context.setAuthentication(auth);
-        SecurityContextHolder.setContext(context);
-
-        HttpSession session = request.getSession(true);
-
-        session.setAttribute(
-                HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
-                context
-        );
-        // register new session to sesion registry
-        sessionRegistry.registerNewSession(session.getId(), auth.getPrincipal());
+        UserDetails userDetails = (UserDetails) auth.getPrincipal();
+        return new UserLoginRespDTO(jwtUtil.generateToken(userDetails.getUsername()));
     }
 
     @Override

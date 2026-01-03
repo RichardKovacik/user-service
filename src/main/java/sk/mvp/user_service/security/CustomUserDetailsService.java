@@ -1,5 +1,6 @@
 package sk.mvp.user_service.security;
 
+import jakarta.transaction.Transactional;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -20,6 +21,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     }
 
     @Override
+    @Transactional
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException, ApplicationException {
         sk.mvp.user_service.model.User user = userRepository.findByUsername(username).orElseThrow(() ->
                 new ApplicationException("User with username " + username + " not found", ErrorType.USER_NOT_FOUND, null));
