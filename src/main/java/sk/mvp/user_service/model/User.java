@@ -43,6 +43,9 @@ public class User {
     @Column(name = "activation_token")
     private String activationToken;
 
+    @Column(name ="token_version", nullable = false)
+    private int tokenVersion;
+
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "user_role",
@@ -144,5 +147,13 @@ public class User {
         return this.getRoles().stream()
                 .map(Role::getName)
                 .toArray(String[]::new);
+    }
+
+    public int getTokenVersion() {
+        return tokenVersion;
+    }
+
+    public void setTokenVersion(int tokenVersion) {
+        this.tokenVersion = tokenVersion;
     }
 }

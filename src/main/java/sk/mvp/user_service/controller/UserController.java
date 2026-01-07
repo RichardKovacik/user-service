@@ -5,6 +5,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.web.bind.annotation.*;
+import sk.mvp.user_service.dto.jwt.TokenPair;
 import sk.mvp.user_service.dto.user.*;
 import sk.mvp.user_service.service.IUserService;
 
@@ -30,7 +31,7 @@ public class UserController {
         return ResponseEntity.ok().body(token.getToken());
     }
     @PostMapping(value = "/login")
-    public UserLoginRespDTO login(@RequestBody @Valid UserLoginReqDTO userLoginReqDTO, HttpServletRequest request) {
+    public TokenPair login(@RequestBody @Valid UserLoginReqDTO userLoginReqDTO, HttpServletRequest request) {
        return userService.loginUser(userLoginReqDTO, request);
     }
 

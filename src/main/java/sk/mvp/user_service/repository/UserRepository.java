@@ -19,6 +19,9 @@ public interface UserRepository extends JpaRepository <User, Long> {
     @Query("select u from User u JOIN u.contact c where c.email = :email")
     Optional<User> findByEmail(String email);
 
+    @Query("select u.tokenVersion from User u where u.username = :username")
+    Optional<Integer> getTokenVersion(String username);
+
     User save(User user);
 
     void delete(User user);

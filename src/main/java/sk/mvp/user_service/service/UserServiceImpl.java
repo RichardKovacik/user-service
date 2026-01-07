@@ -11,6 +11,7 @@ import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import sk.mvp.user_service.dto.ErrorType;
+import sk.mvp.user_service.dto.jwt.TokenPair;
 import sk.mvp.user_service.dto.user.*;
 import sk.mvp.user_service.exception.ApplicationException;
 import sk.mvp.user_service.model.Contact;
@@ -20,7 +21,7 @@ import sk.mvp.user_service.model.User;
 import sk.mvp.user_service.projections.UserSummaryProjection;
 import sk.mvp.user_service.repository.RoleRepository;
 import sk.mvp.user_service.repository.UserRepository;
-import sk.mvp.user_service.security.JwtUtil;
+import sk.mvp.user_service.service.jwt.ITokenService;
 
 import java.util.List;
 import java.util.Optional;
@@ -32,20 +33,20 @@ public class UserServiceImpl implements IUserService {
     private RoleRepository roleRepository;
     private AuthenticationManager authenticationManager;
     private final SessionRegistry sessionRegistry;
-    private JwtUtil jwtUtil;
+    private ITokenService jwtService;
 
     public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository,
                            AuthenticationManager authenticationManager,
-                           SessionRegistry sessionRegistry, JwtUtil jwtUtil) {
+                           SessionRegistry sessionRegistry, ITokenService jwtService) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.authenticationManager = authenticationManager;
         this.sessionRegistry = sessionRegistry;
-        this.jwtUtil = jwtUtil;
+        this.jwtService = jwtService;
     }
 
     @Override
-    public UserLoginRespDTO loginUser(UserLoginReqDTO userLoginReqDTO, HttpServletRequest request) {
+    public TokenPair loginUser(UserLoginReqDTO userLoginReqDTO, HttpServletRequest request) {
         //prebhene autetifikacia najdenie usera, provnanei hesla
         Authentication auth = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -54,8 +55,10 @@ public class UserServiceImpl implements IUserService {
                 )
         );
         UserDetails userDetails = (UserDetails) auth.getPrincipal();
-        return new UserLoginRespDTO(jwtUtil.generateToken(userDetails.getUsername()));
+        return jwtService.generateTokenPair(userDetails.getUsername());
     }
+
+
 
     @Override
     @Transactional
