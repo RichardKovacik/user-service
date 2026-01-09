@@ -5,6 +5,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import sk.mvp.user_service.model.Gender;
 import sk.mvp.user_service.model.User;
@@ -21,6 +22,10 @@ public interface UserRepository extends JpaRepository <User, Long> {
 
     @Query("select u.tokenVersion from User u where u.username = :username")
     Optional<Integer> getTokenVersion(String username);
+
+    @Modifying
+    @Query("update User u set u.tokenVersion = u.tokenVersion + 1 where u.username = :username")
+    void incrementTokenVersion(@Param("username") String username);
 
     User save(User user);
 

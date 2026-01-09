@@ -6,37 +6,34 @@ import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import sk.mvp.user_service.config.JwtConfig;
+import sk.mvp.user_service.dto.auth.UserDetail;
+import sk.mvp.user_service.exception.InvalidTokenException;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Date;
+import java.util.List;
 
 @Component
 public class JwtUtil {
-    private JwtConfig jwtConfig;
-    private SecretKey accesKey;
-    private SecretKey refreshKey;
+    private JwtConfig jwtConfig;;
 
     public JwtUtil(JwtConfig jwtConfig) {
         this.jwtConfig = jwtConfig;
     }
 
-    // Initializes the key after the class is instantiated
-    @PostConstruct
-    private void init() {
-        this.accesKey = Keys.hmacShaKeyFor(jwtConfig.getSecret().getBytes(StandardCharsets.UTF_8));
-        this.refreshKey = Keys.hmacShaKeyFor(jwtConfig.getSecret().getBytes(StandardCharsets.UTF_8));
-    }
-
     // Generate JWT token
-    public String generateAccessToken(String username, int tokenVersion) {
+    public String generateAccessToken(String username, int tokenVersion, String jti, String[] roles) {
         return Jwts.builder()
+                .setId(jti)
                 .setSubject(username)
                 .setIssuedAt(new Date())
                 .claim("type", "access_token")
                 .claim("version", tokenVersion)
+                .claim("roles", roles)
                 .setExpiration(new Date((new Date()).getTime() + jwtConfig.getAccesTokenExpiration()))
-                .signWith(accesKey, SignatureAlgorithm.HS256)
+                .signWith(jwtConfig.getAccesKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
@@ -46,26 +43,12 @@ public class JwtUtil {
                 .setId(jti)
                 .claim("type", "refresh_token")
                 .setExpiration(new Date((new Date()).getTime() + jwtConfig.getRefreshTokenExpiration()))
-                .signWith(refreshKey, SignatureAlgorithm.HS256)
+                .signWith(jwtConfig.getRefreshKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
-
-    // Get username from JWT token
-    public String getUsernameFromAccessToken(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(accesKey).build()
-                .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
-    }
-
     public void validateAccessToken(String token, int expectedTokenVersion) throws JwtException {
         try {
-            Claims claims = Jwts.parserBuilder()
-                    .setSigningKey(accesKey)
-                    .build()
-                    .parseClaimsJws(token)
-                    .getBody();
+            Claims claims = parseClaimsFromJwtToken(token, jwtConfig.getAccesKey());
             assertType(claims, "access_token");
             assertTokenVersion(claims, expectedTokenVersion);
         } catch (Exception e) {
@@ -75,10 +58,7 @@ public class JwtUtil {
 
     public void validateRefreshToken(String token) throws JwtException {
         try {
-            Claims claims = Jwts.parserBuilder()
-                    .setSigningKey(refreshKey)
-                    .build()
-                    .parseClaimsJws(token).getBody();
+            Claims claims = parseClaimsFromJwtToken(token, jwtConfig.getRefreshKey());
             assertType(claims, "refresh_token");
         } catch (Exception e) {
             throw new JwtException(e.getMessage());
@@ -96,5 +76,50 @@ public class JwtUtil {
         if (tokenVersion != expectedVersion) {
             throw new JwtException("Token version mismatch");
         }
+    }
+
+    /**
+     * get time to live from claims
+     * @param claims
+     * @return
+     */
+    public Duration ttlUntilExpiration(Claims claims) {
+
+        Date expiration = claims.getExpiration();
+        long now = System.currentTimeMillis();
+
+        long ttlMillis = expiration.getTime() - now;
+
+        if (ttlMillis <= 0) {
+            return Duration.ZERO;
+        }
+
+        return Duration.ofMillis(ttlMillis);
+    }
+
+    public UserDetail getUserDetailFromAccessToken(String token) throws InvalidTokenException {
+        UserDetail userDetail = null;
+        try {
+            Claims claims = parseClaimsFromJwtToken(token, jwtConfig.getAccesKey());
+
+            return new UserDetail(
+                    claims.getSubject(),
+                    claims.get("roles", List.class));
+        }catch (Exception e) {
+            throw new InvalidTokenException(e.getMessage());
+        }
+    }
+    public Claims parseClaimsFromJwtToken(String token, SecretKey secretKey) throws JwtException {
+        Claims claims = null;
+        try {
+            claims = Jwts.parserBuilder()
+                    .setSigningKey(secretKey)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+        }catch (Exception e) {
+            throw new JwtException(e.getMessage());
+        }
+        return claims;
     }
 }

@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import sk.mvp.user_service.dto.jwt.TokenPair;
 import sk.mvp.user_service.dto.user.*;
 import sk.mvp.user_service.service.IUserService;
+import sk.mvp.user_service.service.auth.IAuthService;
 
 import java.util.List;
 
@@ -15,9 +16,11 @@ import java.util.List;
 @RequestMapping(value = "api/users")
 public class UserController {
     private IUserService userService;
+    private IAuthService authService;
 
-    public UserController(IUserService userService) {
+    public UserController(IUserService userService, IAuthService authService) {
         this.userService = userService;
+        this.authService = authService;
     }
 
     @GetMapping("/get/token")
@@ -32,7 +35,7 @@ public class UserController {
     }
     @PostMapping(value = "/login")
     public TokenPair login(@RequestBody @Valid UserLoginReqDTO userLoginReqDTO, HttpServletRequest request) {
-       return userService.loginUser(userLoginReqDTO, request);
+       return authService.loginUser(userLoginReqDTO, request);
     }
 
     @GetMapping(value = "/by-name/{firstName}")

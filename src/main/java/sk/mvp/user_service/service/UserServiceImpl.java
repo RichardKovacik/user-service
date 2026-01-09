@@ -31,34 +31,12 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements IUserService {
     private UserRepository userRepository;
     private RoleRepository roleRepository;
-    private AuthenticationManager authenticationManager;
-    private final SessionRegistry sessionRegistry;
-    private ITokenService jwtService;
 
-    public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository,
-                           AuthenticationManager authenticationManager,
-                           SessionRegistry sessionRegistry, ITokenService jwtService) {
+    public UserServiceImpl(UserRepository userRepository,
+                           RoleRepository roleRepository) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
-        this.authenticationManager = authenticationManager;
-        this.sessionRegistry = sessionRegistry;
-        this.jwtService = jwtService;
     }
-
-    @Override
-    public TokenPair loginUser(UserLoginReqDTO userLoginReqDTO, HttpServletRequest request) {
-        //prebhene autetifikacia najdenie usera, provnanei hesla
-        Authentication auth = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        userLoginReqDTO.username(),
-                        userLoginReqDTO.password()
-                )
-        );
-        UserDetails userDetails = (UserDetails) auth.getPrincipal();
-        return jwtService.generateTokenPair(userDetails.getUsername());
-    }
-
-
 
     @Override
     @Transactional

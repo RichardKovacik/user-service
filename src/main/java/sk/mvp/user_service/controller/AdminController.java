@@ -5,6 +5,7 @@ import org.springframework.security.core.session.SessionInformation;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.web.bind.annotation.*;
 import sk.mvp.user_service.service.IUserService;
+import sk.mvp.user_service.service.auth.IAuthService;
 
 import java.util.HashMap;
 import java.util.List;
@@ -15,10 +16,17 @@ import java.util.Map;
 public class AdminController {
     private IUserService userService;
     private final SessionRegistry sessionRegistry;
+    private IAuthService authService;
 
-    public AdminController(IUserService userService, SessionRegistry sessionRegistry) {
+    public AdminController(IUserService userService, SessionRegistry sessionRegistry, IAuthService authService) {
         this.userService = userService;
         this.sessionRegistry = sessionRegistry;
+        this.authService = authService;
+    }
+    @DeleteMapping(value = "/revokeTokens")
+    public ResponseEntity<?>  removeRole(@RequestParam String username) {
+        authService.revokeTokens(username);
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping(value = "/assignRole")

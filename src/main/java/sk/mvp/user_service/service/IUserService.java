@@ -18,7 +18,6 @@ public interface IUserService {
     void unassignRoleFromUser(String username, String roleName);
     void updateUserProfile(String userName, UserProfileDTO userProfileDTO);
     List<UserSummaryDTO> getUsersByGender(int page, int rows, String gender);
-    TokenPair loginUser(UserLoginReqDTO userLoginReqDTO, HttpServletRequest request);
 
     /**
      * get acataul version of acces token

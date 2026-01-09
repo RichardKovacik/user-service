@@ -34,6 +34,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             String jwt = parseJwt(request);
 
             if (jwt != null) {
+                // parse jet token a get user detail obejct from it
                 UserDetails userDetails = jwtService.getUserDetailFromAccessToken(jwt);
                 jwtService.validateAccessToken(jwt, userDetails);
 
@@ -41,7 +42,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                         userDetails,
                         null,
                         userDetails.getAuthorities());
-                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
                 SecurityContextHolder.getContext().setAuthentication(authentication);
 
             }
