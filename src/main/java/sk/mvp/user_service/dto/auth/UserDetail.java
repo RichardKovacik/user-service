@@ -8,6 +8,7 @@ import sk.mvp.user_service.model.User;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -59,5 +60,24 @@ public class UserDetail implements UserDetails {
         return roles.stream()
                 .map(role -> new SimpleGrantedAuthority(role))
                 .toList();
+    }
+
+    /**
+     * ovveride custom equals function to compare two objects
+     * Using only immutable attributes of object is very important
+     * @param o
+     * @return
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        UserDetail that = (UserDetail) o;
+        return id == that.id && Objects.equals(username, that.username);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, username);
     }
 }

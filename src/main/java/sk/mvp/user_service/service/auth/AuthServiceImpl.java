@@ -8,6 +8,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import sk.mvp.user_service.dto.jwt.TokenPair;
 import sk.mvp.user_service.dto.user.UserLoginReqDTO;
+import sk.mvp.user_service.exception.ApplicationException;
+import sk.mvp.user_service.exception.InvalidTokenException;
 import sk.mvp.user_service.service.jwt.ITokenService;
 
 @Service
@@ -26,7 +28,7 @@ public class AuthServiceImpl implements IAuthService {
     }
 
     @Override
-    public TokenPair loginUser(UserLoginReqDTO userLoginReqDTO, HttpServletRequest request) {
+    public TokenPair loginUser(UserLoginReqDTO userLoginReqDTO) {
         //prebhene autetifikacia najdenie usera, provnanei hesla
         Authentication auth = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -36,5 +38,10 @@ public class AuthServiceImpl implements IAuthService {
         );
         UserDetails userDetails = (UserDetails) auth.getPrincipal();
         return jwtService.generateTokenPair(userDetails);
+    }
+
+    @Override
+    public TokenPair refreshTokens(String refreshToken) throws ApplicationException {
+        return jwtService.refreshTokens(refreshToken);
     }
 }

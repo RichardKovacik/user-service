@@ -2,6 +2,7 @@ package sk.mvp.user_service.security;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
@@ -12,6 +13,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.util.WebUtils;
 import sk.mvp.user_service.service.jwt.ITokenService;
 
 import java.io.IOException;
@@ -31,12 +33,20 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
         try {
-            String jwt = parseJwt(request);
+            //auth by header
+            String accessToken = parseJwt(request);
 
-            if (jwt != null) {
+            //auth by cookie from web apps
+            // auth by cookie
+            if (accessToken == null) {
+                Cookie cookie = WebUtils.getCookie(request, "access_token");
+                if (cookie != null && cookie.getValue() != null) accessToken = cookie.getValue();
+            }
+
+            if (accessToken != null) {
                 // parse jet token a get user detail obejct from it
-                UserDetails userDetails = jwtService.getUserDetailFromAccessToken(jwt);
-                jwtService.validateAccessToken(jwt, userDetails);
+                UserDetails userDetails = jwtService.getUserDetailFromAccessToken(accessToken);
+                jwtService.validateAccessToken(accessToken, userDetails);
 
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                         userDetails,

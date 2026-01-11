@@ -13,6 +13,13 @@ public interface ITokenService {
      * @return access and refresh token
      */
     TokenPair generateTokenPair(UserDetails userDetails);
+
+    /**
+     * Method to generate new acces token after acces token expires
+     * Genreate also new refresh token and old one is deleted
+     * @param refreshToken base64 encoded token
+     * @return
+     */
     TokenPair refreshTokens(String refreshToken);
 
     /**

@@ -38,7 +38,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable) // Disable CSRF
                 .cors(AbstractHttpConfigurer::disable) // Disable CORS (or configure if needed)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/users/login", "/login/**").permitAll()
+                        .requestMatchers("/api/users/login", "/login/**", "/api/users/web/login/**").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/users/**").hasAnyRole("USER", "ADMIN")
                         .anyRequest().authenticated()

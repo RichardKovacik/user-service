@@ -12,6 +12,7 @@ import sk.mvp.user_service.dto.auth.UserDetail;
 import sk.mvp.user_service.dto.jwt.TokenPair;
 import sk.mvp.user_service.exception.ApplicationException;
 import sk.mvp.user_service.exception.InvalidTokenException;
+import sk.mvp.user_service.model.User;
 import sk.mvp.user_service.repository.UserRepository;
 import sk.mvp.user_service.service.auth.CustomUserDetailsService;
 import sk.mvp.user_service.service.redis.IRedisService;
@@ -65,7 +66,27 @@ public class TokenServiceImpl implements ITokenService {
 
     @Override
     public TokenPair refreshTokens(String refreshToken) {
-        return null;
+        //check if refresh token is valid, signing, expiratuon, type, fields...
+        jwtUtil.validateRefreshToken(refreshToken);
+        //parse claims from token
+        Claims claims = jwtUtil.parseClaimsFromJwtToken(refreshToken, jwtConfig.getRefreshKey());
+        //check if refresh is in whitelist
+        String refreshKey = "auth:refresh:token:"+claims.getId();
+        String userName = String.valueOf(redisService.get(refreshKey)
+                .orElseThrow(()-> new ApplicationException(
+                        "Refresh token reuse detected",
+                        ErrorType.TOKEN_REUSED_DETECTED,
+                        null)));
+        //delete actual refresh token from whitelist
+        revokeRefreshToken(refreshToken);
+        //delete refresh token from Set reddis (cron job bude mazat na tzydnnej baze tokeny zo setu)
+
+        //get userdetai from db
+        User user = userRepository.findByUsername(userName)
+                .orElseThrow(() -> new ApplicationException("User with username " + userName + " not found", ErrorType.USER_NOT_FOUND, null));
+
+        //generate new pairs and also add in reddis whotelist noew refresh token
+        return generateTokenPair(new UserDetail(user));
     }
 
     @Override
@@ -93,7 +114,8 @@ public class TokenServiceImpl implements ITokenService {
 
     @Override
     public void revokeRefreshToken(String refreshToken) {
-        String key = "auth:refresh:token:"+ jwtUtil.parseClaimsFromJwtToken(refreshToken, jwtConfig.getRefreshKey()).getId();
+        String tokenId = jwtUtil.parseClaimsFromJwtToken(refreshToken, jwtConfig.getRefreshKey()).getId();
+        String key = "auth:refresh:token:" + tokenId;
         redisService.delete(key);
     }
 

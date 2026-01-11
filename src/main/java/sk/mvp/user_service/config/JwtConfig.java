@@ -10,10 +10,20 @@ import java.nio.charset.StandardCharsets;
 
 @Configuration
 public class JwtConfig {
+    @Value("${jwt.cookie.isSecure}")
+    private boolean cookieIsSecure;
+    @Value("${jwt.cookie.isHttpOnly}")
+    private boolean cookieIsHttpOnly;
+    @Value("${jwt.cookie.sameSite}")
+    private String coikieSameSite;
+    @Value("${jwt.cookie.domain}")
+    private String cookieDomain;
     @Value("${jwt.acces_token.expiration}")
     private long accesTokenExpiration;
     @Value("${jwt.refresh_token.expiration}")
     private long refreshTokenExpiration;
+    @Value("${jwt.cookie.refreshToken.path}")
+    private String refreshTokenCookiePath;
     @Value("${jwt.secret}")
     private String secret;
     private SecretKey accesKey;
@@ -44,5 +54,25 @@ public class JwtConfig {
 
     public SecretKey getRefreshKey() {
         return refreshKey;
+    }
+
+    public String getCookieDomain() {
+        return cookieDomain;
+    }
+
+    public boolean isCookieIsSecure() {
+        return cookieIsSecure;
+    }
+
+    public boolean isCookieIsHttpOnly() {
+        return cookieIsHttpOnly;
+    }
+
+    public String getCoikieSameSite() {
+        return coikieSameSite;
+    }
+
+    public String getRefreshTokenCookiePath() {
+        return refreshTokenCookiePath;
     }
 }
