@@ -4,14 +4,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.stereotype.Component;
-import sk.mvp.user_service.model.Role;
-import sk.mvp.user_service.model.User;
-import sk.mvp.user_service.repository.UserRepository;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import sk.mvp.user_service.user.repository.UserRepository;
 
 //@Component
 public class SandBoxRunner implements CommandLineRunner {

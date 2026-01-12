@@ -12,9 +12,9 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
-import sk.mvp.user_service.dto.user.UserProfileDTO;
-import sk.mvp.user_service.model.User;
-import sk.mvp.user_service.repository.UserRepository;
+import sk.mvp.user_service.user.dto.UserProfile;
+import sk.mvp.user_service.entity.User;
+import sk.mvp.user_service.user.repository.UserRepository;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -50,9 +50,9 @@ public class UserServiceTest {
     @ParameterizedTest
     @ValueSource(strings = {"marek.kovac@example.com","lucia.siposova@example.com"})
     void shouldReturnUserByEmail_parametrized(String email) {
-        ResponseEntity<UserProfileDTO> response = restTemplate.getForEntity(
+        ResponseEntity<UserProfile> response = restTemplate.getForEntity(
                 baseUrl + "/api/users/by-email/" + email,
-                UserProfileDTO.class
+                UserProfile.class
         );
 
         // check status

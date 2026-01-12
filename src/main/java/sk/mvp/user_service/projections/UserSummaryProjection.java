@@ -1,6 +1,6 @@
 package sk.mvp.user_service.projections;
 
-import sk.mvp.user_service.model.Gender;
+import sk.mvp.user_service.entity.Gender;
 
 public interface UserSummaryProjection {
     String getUsername();

@@ -5,10 +5,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
-import sk.mvp.user_service.model.Contact;
-import sk.mvp.user_service.model.Gender;
-import sk.mvp.user_service.model.User;
-import sk.mvp.user_service.repository.UserRepository;
+import sk.mvp.user_service.entity.Contact;
+import sk.mvp.user_service.entity.Gender;
+import sk.mvp.user_service.entity.User;
+import sk.mvp.user_service.user.repository.UserRepository;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
