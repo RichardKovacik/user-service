@@ -15,7 +15,7 @@ public class UserProfile implements Serializable {
 
     private String genderCode;
 
-    private ContactResp concat;
+    private ContactResp contact;
 
     public UserProfile() {
     }
@@ -27,7 +27,7 @@ public class UserProfile implements Serializable {
             this.genderCode = user.getGender().getCodeAsString();
             this.username = user.getUsername();
             if (user.getContact() != null) {
-               this.concat = new ContactResp(user.getContact().getEmail(), user.getContact().getPhoneNumber());
+               this.contact = new ContactResp(user.getContact().getEmail(), user.getContact().getPhoneNumber());
             }
         }
     }
@@ -48,8 +48,8 @@ public class UserProfile implements Serializable {
         return genderCode;
     }
 
-    public ContactResp getConcat() {
-        return concat;
+    public ContactResp getContact() {
+        return contact;
     }
 
     public void setUsername(String username) {
@@ -68,7 +68,7 @@ public class UserProfile implements Serializable {
         this.genderCode = genderCode;
     }
 
-    public void setConcat(ContactResp concat) {
-        this.concat = concat;
+    public void setContact(ContactResp contact) {
+        this.contact = contact;
     }
 }

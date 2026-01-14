@@ -11,6 +11,7 @@ import sk.mvp.user_service.entity.Gender;
 import sk.mvp.user_service.entity.Role;
 import sk.mvp.user_service.entity.User;
 import sk.mvp.user_service.projections.UserSummaryProjection;
+import sk.mvp.user_service.user.dto.ContactResp;
 import sk.mvp.user_service.user.dto.UserProfile;
 import sk.mvp.user_service.auth.dto.RegistrationReq;
 import sk.mvp.user_service.admin.dto.UserSummary;
@@ -72,6 +73,22 @@ public class UserServiceImpl implements IUserService {
         }
         if (userProfileDTO.getLastName() != null && !userProfileDTO.getLastName().isEmpty()) {
             user.setLastName(userProfileDTO.getLastName());
+        }
+        ContactResp contactDto = userProfileDTO.getContact();
+        if (contactDto != null) {
+            // pokial ide zmenit email a novy sa rovna staremu tak nespravi mziadnu zmenu v db preskocim
+            if (contactDto.email() != null && !contactDto.email().isEmpty()
+                    && !contactDto.email().equals(user.getContact().getEmail())){
+                //check if email already exists
+                Optional<User> foundedUser = userRepository.findByEmail(contactDto.email() );
+                if (foundedUser.isPresent()) {
+                    throw new ApplicationException(String.format("Email %s is already in use", contactDto.email()), ErrorType.EMAIL_DUPLICATED, null);
+                }
+                user.getContact().setEmail(contactDto.email());
+            }
+            if (contactDto.phoneNumber() != null && !contactDto.phoneNumber().isEmpty()) {
+                user.getContact().setPhoneNumber(contactDto.phoneNumber());
+            }
         }
 
         userRepository.save(user);

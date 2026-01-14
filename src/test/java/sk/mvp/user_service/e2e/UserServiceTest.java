@@ -58,7 +58,7 @@ public class UserServiceTest {
         // check status
         assertEquals(200, response.getStatusCode().value());
         // Overíme email vo vnútri contact DTO
-        assertEquals(email, Objects.requireNonNull(response.getBody()).getConcat().email());
+        assertEquals(email, Objects.requireNonNull(response.getBody()).getContact().email());
     }
 
     @Order(1)
