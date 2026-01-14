@@ -135,4 +135,9 @@ public class AdminServiceImpl implements IAdminService {
     public void revokeTokens(String username) {
         jwtService.revokeAllTokens(username);
     }
+
+    @Override
+    public void setUserActivation(String username, boolean isActivated) {
+
+    }
 }

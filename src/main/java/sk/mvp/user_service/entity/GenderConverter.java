@@ -1,8 +1,7 @@
-package sk.mvp.user_service.common.utils;
+package sk.mvp.user_service.entity;
 
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
-import sk.mvp.user_service.entity.Gender;
 
 @Converter(autoApply = true)
 public class GenderConverter implements AttributeConverter<Gender, Character> {

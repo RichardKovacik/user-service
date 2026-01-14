@@ -1,7 +1,7 @@
 package sk.mvp.user_service.entity;
 
 import jakarta.persistence.*;
-import sk.mvp.user_service.common.utils.GenderConverter;
+
 import java.util.Set;
 
 @Entity
@@ -38,13 +38,14 @@ public class User {
     @Convert(converter = GenderConverter.class)
     private Gender gender;
 
-    private boolean activated;
+    private boolean activated = false;
 
     @Column(name = "activation_token")
     private String activationToken;
 
+    //init value sets to 1
     @Column(name ="token_version", nullable = false)
-    private int tokenVersion;
+    private int tokenVersion = 1;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(

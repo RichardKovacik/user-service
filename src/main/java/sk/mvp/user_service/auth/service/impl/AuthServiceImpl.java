@@ -77,6 +77,14 @@ public class AuthServiceImpl implements IAuthService {
         return new UserProfile(savedUser);
     }
 
+    @Override
+    public void logout(String refreshToken, String accessToken) {
+        // remove refresh token from reddis
+        jwtService.revokeRefreshToken(refreshToken);
+        // add acces token to blacklist
+        jwtService.revokeAccessToken(accessToken);
+    }
+
     // check if emails is not used another user
     private void checkEmailIsNotUsed(String email) {
         Optional<User> user = userRepository.findByEmail(email);

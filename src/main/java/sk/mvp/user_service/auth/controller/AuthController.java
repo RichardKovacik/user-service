@@ -113,4 +113,18 @@ public class AuthController {
     public UserProfile createUser(@RequestBody @Valid RegistrationReq registrationReq) {
         return authService.registerUser(registrationReq);
     }
+
+    @PostMapping(value = "/web/logout")
+    public ResponseEntity<?> logoutUser(@NotNull @CookieValue(name = "refresh_token") String refreshToken,
+                                  @NotNull @CookieValue(name = "access_token") String accessToken,
+                                  HttpServletResponse response) {
+        authService.logout(refreshToken, accessToken);
+        // clear tokens in cookie
+        ResponseCookie refreshCookie = CookieUtils.removed("refresh_token", jwtConfig.getCookieDomain(), true);
+        ResponseCookie accessCookie = CookieUtils.removed("access_token", jwtConfig.getCookieDomain(), true);
+
+        response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
+        response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
+        return ResponseEntity.ok().build();
+    }
 }

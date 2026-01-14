@@ -10,5 +10,6 @@ public interface IAuthService {
     TokenPair loginUser(LoginReq loginReq);
     TokenPair refreshTokens(String refreshToken);
     UserProfile registerUser(RegistrationReq user);
+    void logout(String refreshToken, String accessToken);
     // void logout(HttpServletRequest request);
 }

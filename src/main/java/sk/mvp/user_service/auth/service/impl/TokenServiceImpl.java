@@ -98,6 +98,13 @@ public class TokenServiceImpl implements ITokenService {
         try {
             int tokenVersion = getTokenVersion(userDetails.getUsername());
             jwtUtil.validateAccessToken(accessToken, tokenVersion);
+            // validate id acces toekn is in blacklist
+            Claims claims = jwtUtil.parseClaimsFromJwtToken(accessToken, jwtConfig.getAccesKey());
+            String key = "auth:access:blacklist:" + claims.getId();
+            if (redisService.has(key)) {
+                throw new ApplicationException("Access token is in blacklist. Possible security breach !!", ErrorType.TOKEN_REUSED_DETECTED, null);
+            }
+
         }catch (Exception e) {
             throw new InvalidTokenException(e.getMessage());
         }
@@ -108,7 +115,7 @@ public class TokenServiceImpl implements ITokenService {
         //add access token to blacklist for reaming time to live of token, used when logout
         Claims claims = jwtUtil.parseClaimsFromJwtToken(accessToken, jwtConfig.getAccesKey());
         String key = "auth:access:blacklist:" + claims.getId();
-        redisService.set(key, accessToken, jwtUtil.ttlUntilExpiration(claims));
+        redisService.set(key, claims.getId(), jwtUtil.ttlUntilExpiration(claims));
     }
 
     @Override
@@ -125,7 +132,7 @@ public class TokenServiceImpl implements ITokenService {
             throw new IllegalArgumentException("User name cannot be null or empty");
         }
 
-        String key = "auth:user:tokenVersion:" + userName;
+        String key = "auth:access:user:tokenVersion:" + userName;
 
         // try hit redis chache
         Optional<String> cachedValue = redisService.get(key);
@@ -163,7 +170,7 @@ public class TokenServiceImpl implements ITokenService {
         redisService.delete(userRefreshTokensKey);
 
         // delete cached reddis  auth:user:tokenVersion
-        String tokenVersionKey = "auth:user:tokenVersion:" + userName;
+        String tokenVersionKey = "auth:access:user:tokenVersion:" + userName;
         redisService.delete(tokenVersionKey);
     }
 }
