@@ -2,8 +2,10 @@ package sk.mvp.user_service.auth.service.impl;
 
 import jakarta.transaction.Transactional;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import sk.mvp.user_service.auth.dto.RegistrationReq;
@@ -38,12 +40,17 @@ public class AuthServiceImpl implements IAuthService {
     @Override
     public TokenPair loginUser(LoginReq loginReq) {
         //prebhene autetifikacia najdenie usera, provnanei hesla
-        Authentication auth = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        loginReq.username(),
-                        loginReq.password()
-                )
-        );
+        Authentication auth;
+        try {
+            auth = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            loginReq.username(),
+                            loginReq.password()
+                    )
+            );
+        }catch (AuthenticationException e) {
+            throw new ApplicationException(e.getMessage(), ErrorType.INVALID_CREDENTIAL, null);
+        }
         UserDetails userDetails = (UserDetails) auth.getPrincipal();
         return jwtService.generateTokenPair(userDetails);
     }

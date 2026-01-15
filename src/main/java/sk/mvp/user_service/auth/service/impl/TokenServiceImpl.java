@@ -98,7 +98,7 @@ public class TokenServiceImpl implements ITokenService {
         try {
             int tokenVersion = getTokenVersion(userDetails.getUsername());
             jwtUtil.validateAccessToken(accessToken, tokenVersion);
-            // validate id acces toekn is in blacklist
+            // validate if accesa token is in blacklist
             Claims claims = jwtUtil.parseClaimsFromJwtToken(accessToken, jwtConfig.getAccesKey());
             String key = "auth:access:blacklist:" + claims.getId();
             if (redisService.has(key)) {

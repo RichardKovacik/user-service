@@ -2,6 +2,7 @@ package sk.mvp.user_service.common.exception.data;
 
 public enum ErrorType {
     USER_NOT_FOUND(404),
+    INVALID_CREDENTIAL(401),
     ROLE_NOT_FOUND(404),
     INPUT_VALIDATION_ERROR(400),
     USER_NAME_DUPLICATED(409),

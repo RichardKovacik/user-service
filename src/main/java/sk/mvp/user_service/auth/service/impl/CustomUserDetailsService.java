@@ -20,9 +20,9 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     @Transactional
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException, ApplicationException {
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         sk.mvp.user_service.entity.User user = userRepository.findByUsername(username).orElseThrow(() ->
-                new ApplicationException("User with username " + username + " not found", ErrorType.USER_NOT_FOUND, null));
+                new UsernameNotFoundException("Username not found"));
         return new UserDetail(user);
     }
 }
