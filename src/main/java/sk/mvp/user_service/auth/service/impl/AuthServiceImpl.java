@@ -7,6 +7,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import sk.mvp.user_service.auth.dto.RegistrationReq;
 import sk.mvp.user_service.auth.service.IAuthService;
@@ -48,8 +49,10 @@ public class AuthServiceImpl implements IAuthService {
                             loginReq.password()
                     )
             );
-        }catch (AuthenticationException e) {
+        }catch (BadCredentialsException | UsernameNotFoundException e) {
             throw new ApplicationException(e.getMessage(), ErrorType.INVALID_CREDENTIAL, null);
+        } catch (RuntimeException e) {
+            throw new ApplicationException(e.getMessage(), ErrorType.INTERNAL_SERVER_ERROR, null);
         }
         UserDetails userDetails = (UserDetails) auth.getPrincipal();
         return jwtService.generateTokenPair(userDetails);
