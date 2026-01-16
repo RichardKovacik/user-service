@@ -22,6 +22,11 @@ public class RedisServiceImpl implements IRedisService {
     }
 
     @Override
+    public void increment(String key) {
+        redisTemplate.opsForValue().increment(key);
+    }
+
+    @Override
     public void delete(String key) {
         redisTemplate.delete(key);
     }

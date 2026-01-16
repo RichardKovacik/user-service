@@ -6,6 +6,7 @@ import java.util.Set;
 
 public interface IRedisService {
     void set(String key, String value, Duration duration);
+    void increment(String key);
     void delete(String key);
     void addValueToSet(String key, String value);
     Set<String> getSet(String key);
