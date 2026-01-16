@@ -21,6 +21,7 @@ import java.time.Duration;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class TokenServiceImpl implements ITokenService {
@@ -135,7 +136,7 @@ public class TokenServiceImpl implements ITokenService {
         String key = "auth:access:user:tokenVersion:" + userName;
 
         // try hit redis chache
-        Optional<String> cachedValue = redisService.get(key);
+        Optional<String> cachedValue = redisService.get(key).map(Object::toString);
         if (cachedValue.isPresent()) {
             return Integer.parseInt(cachedValue.get());
         }
@@ -159,7 +160,7 @@ public class TokenServiceImpl implements ITokenService {
 
         //get all user refresh tokens from set
         String userRefreshTokensKey = "auth:refresh:user:" + userName;
-        Set<String> refreshJtis = redisService.getSet(userRefreshTokensKey);
+        Set<String> refreshJtis = redisService.getSet(userRefreshTokensKey).stream().map(Object::toString).collect(Collectors.toSet());
 
         //delete refresh token from whitelist
         for(String key : refreshJtis) {

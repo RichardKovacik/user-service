@@ -25,6 +25,7 @@ import sk.mvp.user_service.user.dto.UserProfile;
 import sk.mvp.user_service.user.repository.UserRepository;
 
 import java.time.Duration;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -48,13 +49,18 @@ public class AuthServiceImpl implements IAuthService {
     public TokenPair loginUser(LoginReq loginReq) {
         String loginAttemptsKey = AuthConts.REDISS_AUTH_LOGIN_ATTEMPTS_USER_COLL + loginReq.username();
         String lockedUserKey = AuthConts.REDISS_AUTH_BLACKLIST_USER_COLL + loginReq.username();
-        //check if user is not locked
-        if (redisService.has(lockedUserKey)) {
+
+        // result = -1 user is locked(reach max attemts of login)
+        Long result = redisService.executeLuaScript("redis/login_attempts.lua",
+                List.of(loginAttemptsKey,lockedUserKey),
+                300, AuthConts.MAX_LOGIN_ATTEMPTS,60);
+
+        //if user is locked throw exception
+        if (result == -1) {
             throw new ApplicationException("You have tried too many times, please try again later.",
                     ErrorType.TOO_MANY_REQUESTS,
                     null);
         }
-
         // prebhene autetifikacia najdenie usera, provnanei hesla -> customUserDetailService
         Authentication auth;
         try {
@@ -65,26 +71,26 @@ public class AuthServiceImpl implements IAuthService {
                     )
             );
         }catch (BadCredentialsException | UsernameNotFoundException e) {
-            Optional<String> value = redisService.get(loginAttemptsKey);
-            if (value.isEmpty()) {
-                //setup reddis collection with 5 min TTL
-                redisService.set(loginAttemptsKey,"1", Duration.ofSeconds(300));
-            } else {
-                if (Integer.parseInt(value.get()) + 1 >= AuthConts.MAX_LOGIN_ATTEMPTS) {
-                    // lock user to specific time, add to blacklist
-                    redisService.set(lockedUserKey,"locked", Duration.ofSeconds(60));
-                    // delete loginAttempts collection
-                    redisService.delete(loginAttemptsKey);
-                    // throw excpetion too many req
-                    throw new ApplicationException("You have tried too many times, please try again later.",
-                            ErrorType.TOO_MANY_REQUESTS,
-                            null);
-                }else {
-                    redisService.increment(loginAttemptsKey);
-                }
-
-            }
             throw new ApplicationException(e.getMessage(), ErrorType.INVALID_CREDENTIAL, null);
+//            Optional<String> value = redisService.get(loginAttemptsKey);
+//            if (value.isEmpty()) {
+//                //setup reddis collection with 5 min TTL
+//                redisService.set(loginAttemptsKey,"1", Duration.ofSeconds(300));
+//            } else {
+//                if (Integer.parseInt(value.get()) + 1 >= AuthConts.MAX_LOGIN_ATTEMPTS) {
+//                    // lock user to specific time, add to blacklist
+//                    redisService.set(lockedUserKey,"locked", Duration.ofSeconds(60));
+//                    // delete loginAttempts collection
+//                    redisService.delete(loginAttemptsKey);
+//                    // throw excpetion too many req
+//                    throw new ApplicationException("You have tried too many times, please try again later.",
+//                            ErrorType.TOO_MANY_REQUESTS,
+//                            null);
+//                }else {
+//                    redisService.increment(loginAttemptsKey);
+//                }
+//
+//            }
         }
         //success login, remove attempts counter collection in reddis if exists
         redisService.delete(loginAttemptsKey);
@@ -129,6 +135,7 @@ public class AuthServiceImpl implements IAuthService {
         // add acces token to blacklist
         jwtService.revokeAccessToken(accessToken);
     }
+
 
     // check if emails is not used another user
     private void checkEmailIsNotUsed(String email) {
