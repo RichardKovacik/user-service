@@ -43,7 +43,7 @@ public class UserProfileTest {
     @Autowired
     private MockMvc mockMvc;
     @Autowired
-    private JwtUtil jwtUtil;
+    private JwtConfig jwtConfig;
     @Autowired
     private UserRepository userRepository;
     private User user;
@@ -66,10 +66,13 @@ public class UserProfileTest {
     @ValueSource(strings = {"turb","mkovac"})
     void shouldReturnUserProfileFromCookie(String username) throws Exception {
         User user = userRepository.findByUsername(username).get();
-        String accesToken = jwtUtil.generateAccessToken(user.getUsername(),
+        String accesToken = JwtUtil.generateAccessToken(user.getUsername(),
                 user.getTokenVersion(),
                 UUID.randomUUID().toString(),
-                user.getRolesAsString());
+                user.getRolesAsString(),
+                jwtConfig.getAccesKey(),
+                jwtConfig.getAccesTokenExpiration()
+                );
         Cookie cookie = new Cookie("access_token", accesToken);
 
         mockMvc.perform(
@@ -90,10 +93,13 @@ public class UserProfileTest {
     @Transactional
     void shouldChangeUserProfileData() throws Exception {
         User user = userRepository.findByUsername("turb").get();
-        String accesToken = jwtUtil.generateAccessToken(user.getUsername(),
+        String accesToken = JwtUtil.generateAccessToken(user.getUsername(),
                 user.getTokenVersion(),
                 UUID.randomUUID().toString(),
-                user.getRolesAsString());
+                user.getRolesAsString(),
+                jwtConfig.getAccesKey(),
+                jwtConfig.getAccesTokenExpiration()
+        );
         Cookie cookie = new Cookie("access_token", accesToken);
         //compose request
         UserProfile req = new UserProfile();
@@ -120,10 +126,13 @@ public class UserProfileTest {
     @Transactional
     void souldFailChangeUserPorfileDataWithExistingEmail() throws Exception {
         User user = userRepository.findByUsername("turb").get();
-        String accesToken = jwtUtil.generateAccessToken(user.getUsername(),
+        String accesToken = JwtUtil.generateAccessToken(user.getUsername(),
                 user.getTokenVersion(),
                 UUID.randomUUID().toString(),
-                user.getRolesAsString());
+                user.getRolesAsString(),
+                jwtConfig.getAccesKey(),
+                jwtConfig.getAccesTokenExpiration()
+        );
         Cookie cookie = new Cookie("access_token", accesToken);
         //compose request with exiting email
         UserProfile req = new UserProfile();

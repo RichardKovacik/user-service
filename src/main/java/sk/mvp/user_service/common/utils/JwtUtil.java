@@ -11,16 +11,15 @@ import java.time.Duration;
 import java.util.Date;
 import java.util.List;
 
-@Component
 public class JwtUtil {
-    private JwtConfig jwtConfig;;
-
-    public JwtUtil(JwtConfig jwtConfig) {
-        this.jwtConfig = jwtConfig;
-    }
 
     // Generate JWT token
-    public String generateAccessToken(String username, int tokenVersion, String jti, String[] roles) {
+    public static String generateAccessToken(String username,
+                                             int tokenVersion,
+                                             String jti,
+                                             String[] roles,
+                                             SecretKey accessKey,
+                                             long accesTokenExp) {
         return Jwts.builder()
                 .setId(jti)
                 .setSubject(username)
@@ -28,23 +27,23 @@ public class JwtUtil {
                 .claim("type", "access_token")
                 .claim("version", tokenVersion)
                 .claim("roles", roles)
-                .setExpiration(new Date((new Date()).getTime() + jwtConfig.getAccesTokenExpiration()))
-                .signWith(jwtConfig.getAccesKey(), SignatureAlgorithm.HS256)
+                .setExpiration(new Date((new Date()).getTime() + accesTokenExp))
+                .signWith(accessKey, SignatureAlgorithm.HS256)
                 .compact();
     }
 
     // Generate JWT token
-    public String generateRefreshToken(String jti) {
+    public static String generateRefreshToken(String jti, SecretKey refreshKey, long refresTokenExp) {
         return Jwts.builder()
                 .setId(jti)
                 .claim("type", "refresh_token")
-                .setExpiration(new Date((new Date()).getTime() + jwtConfig.getRefreshTokenExpiration()))
-                .signWith(jwtConfig.getRefreshKey(), SignatureAlgorithm.HS256)
+                .setExpiration(new Date((new Date()).getTime() + refresTokenExp))
+                .signWith(refreshKey, SignatureAlgorithm.HS256)
                 .compact();
     }
-    public void validateAccessToken(String token, int expectedTokenVersion) throws JwtException {
+    public static void validateAccessToken(String token, int expectedTokenVersion,SecretKey accessKey) throws JwtException {
         try {
-            Claims claims = parseClaimsFromJwtToken(token, jwtConfig.getAccesKey());
+            Claims claims = parseClaimsFromJwtToken(token, accessKey);
             assertType(claims, "access_token");
             assertTokenVersion(claims, expectedTokenVersion);
         } catch (Exception e) {
@@ -52,22 +51,22 @@ public class JwtUtil {
         }
     }
 
-    public void validateRefreshToken(String token) throws JwtException {
+    public static void validateRefreshToken(String token, SecretKey refreshKey) throws JwtException {
         try {
-            Claims claims = parseClaimsFromJwtToken(token, jwtConfig.getRefreshKey());
+            Claims claims = parseClaimsFromJwtToken(token, refreshKey);
             assertType(claims, "refresh_token");
         } catch (Exception e) {
             throw new JwtException(e.getMessage());
         }
     }
 
-    private void assertType(Claims claims, String expected) {
+    private static void assertType(Claims claims, String expected) {
         String type = claims.get("type", String.class);
         if (!expected.equals(type)) {
             throw new JwtException("Invalid token type");
         }
     }
-    private void assertTokenVersion(Claims claims, int expectedVersion) {
+    private static void assertTokenVersion(Claims claims, int expectedVersion) {
         int tokenVersion = claims.get("version", Integer.class);
         if (tokenVersion != expectedVersion) {
             throw new JwtException("Token version mismatch");
@@ -79,7 +78,7 @@ public class JwtUtil {
      * @param claims
      * @return
      */
-    public Duration ttlUntilExpiration(Claims claims) {
+    public static Duration ttlUntilExpiration(Claims claims) {
 
         Date expiration = claims.getExpiration();
         long now = System.currentTimeMillis();
@@ -93,10 +92,10 @@ public class JwtUtil {
         return Duration.ofMillis(ttlMillis);
     }
 
-    public UserDetail getUserDetailFromAccessToken(String token) throws InvalidTokenException {
+    public static UserDetail getUserDetailFromAccessToken(String token, SecretKey accessKey) throws InvalidTokenException {
         UserDetail userDetail = null;
         try {
-            Claims claims = parseClaimsFromJwtToken(token, jwtConfig.getAccesKey());
+            Claims claims = parseClaimsFromJwtToken(token, accessKey);
 
             return new UserDetail(
                     claims.getSubject(),
@@ -105,7 +104,7 @@ public class JwtUtil {
             throw new InvalidTokenException(e.getMessage());
         }
     }
-    public Claims parseClaimsFromJwtToken(String token, SecretKey secretKey) throws JwtException {
+    public static Claims parseClaimsFromJwtToken(String token, SecretKey secretKey) throws JwtException {
         Claims claims = null;
         try {
             claims = Jwts.parserBuilder()

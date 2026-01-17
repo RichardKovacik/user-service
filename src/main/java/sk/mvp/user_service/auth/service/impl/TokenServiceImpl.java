@@ -26,14 +26,13 @@ import java.util.stream.Collectors;
 @Service
 public class TokenServiceImpl implements ITokenService {
     private IRedisService redisService;
-    private JwtUtil jwtUtil;
     private JwtConfig jwtConfig;
     private UserRepository userRepository;
 
-    public TokenServiceImpl(IRedisService redisService, JwtUtil jwtUtil,
-                            JwtConfig jwtConfig, UserRepository userRepository) {
+    public TokenServiceImpl(IRedisService redisService,
+                            JwtConfig jwtConfig,
+                            UserRepository userRepository) {
         this.redisService = redisService;
-        this.jwtUtil = jwtUtil;
         this.jwtConfig = jwtConfig;
         this.userRepository = userRepository;
     }
@@ -44,13 +43,15 @@ public class TokenServiceImpl implements ITokenService {
         String jtiRefresh = UUID.randomUUID().toString();
         String jtiAccess = UUID.randomUUID().toString();
 
-        String accessToken = this.jwtUtil.generateAccessToken(userDetails.getUsername(),
+        String accessToken = JwtUtil.generateAccessToken(userDetails.getUsername(),
                 tokenVersion,
                 jtiAccess,
                 userDetails.getAuthorities().stream()
                         .map(GrantedAuthority::getAuthority)
-                        .toArray(String[]::new));
-        String refreshToken = this.jwtUtil.generateRefreshToken(jtiRefresh);
+                        .toArray(String[]::new),
+                jwtConfig.getAccesKey(),
+                jwtConfig.getAccesTokenExpiration());
+        String refreshToken = JwtUtil.generateRefreshToken(jtiRefresh, jwtConfig.getRefreshKey(), jwtConfig.getRefreshTokenExpiration());
         String userRefreshTokensKey = "auth:refresh:user:"+ userDetails.getUsername();
 
         //add refresh token to whitelist
@@ -67,9 +68,9 @@ public class TokenServiceImpl implements ITokenService {
     @Override
     public TokenPair refreshTokens(String refreshToken) {
         //check if refresh token is valid, signing, expiratuon, type, fields...
-        jwtUtil.validateRefreshToken(refreshToken);
+        JwtUtil.validateRefreshToken(refreshToken, jwtConfig.getRefreshKey());
         //parse claims from token
-        Claims claims = jwtUtil.parseClaimsFromJwtToken(refreshToken, jwtConfig.getRefreshKey());
+        Claims claims = JwtUtil.parseClaimsFromJwtToken(refreshToken, jwtConfig.getRefreshKey());
         //check if refresh is in whitelist
         String refreshKey = "auth:refresh:token:"+claims.getId();
         String userName = String.valueOf(redisService.get(refreshKey)
@@ -91,16 +92,16 @@ public class TokenServiceImpl implements ITokenService {
 
     @Override
     public UserDetail getUserDetailFromAccessToken(String accessToken) throws InvalidTokenException {
-       return jwtUtil.getUserDetailFromAccessToken(accessToken);
+       return JwtUtil.getUserDetailFromAccessToken(accessToken, jwtConfig.getAccesKey());
     }
 
     @Override
     public void validateAccessToken(String accessToken, UserDetails userDetails) throws InvalidTokenException {
         try {
             int tokenVersion = getTokenVersion(userDetails.getUsername());
-            jwtUtil.validateAccessToken(accessToken, tokenVersion);
+            JwtUtil.validateAccessToken(accessToken, tokenVersion, jwtConfig.getAccesKey());
             // validate if accesa token is in blacklist
-            Claims claims = jwtUtil.parseClaimsFromJwtToken(accessToken, jwtConfig.getAccesKey());
+            Claims claims = JwtUtil.parseClaimsFromJwtToken(accessToken, jwtConfig.getAccesKey());
             String key = "auth:access:blacklist:" + claims.getId();
             if (redisService.has(key)) {
                 throw new ApplicationException("Access token is in blacklist. Possible security breach !!", ErrorType.TOKEN_REUSED_DETECTED, null);
@@ -114,14 +115,14 @@ public class TokenServiceImpl implements ITokenService {
     @Override
     public void revokeAccessToken(String accessToken) {
         //add access token to blacklist for reaming time to live of token, used when logout
-        Claims claims = jwtUtil.parseClaimsFromJwtToken(accessToken, jwtConfig.getAccesKey());
+        Claims claims = JwtUtil.parseClaimsFromJwtToken(accessToken, jwtConfig.getAccesKey());
         String key = "auth:access:blacklist:" + claims.getId();
-        redisService.set(key, claims.getId(), jwtUtil.ttlUntilExpiration(claims));
+        redisService.set(key, claims.getId(), JwtUtil.ttlUntilExpiration(claims));
     }
 
     @Override
     public void revokeRefreshToken(String refreshToken) {
-        String tokenId = jwtUtil.parseClaimsFromJwtToken(refreshToken, jwtConfig.getRefreshKey()).getId();
+        String tokenId = JwtUtil.parseClaimsFromJwtToken(refreshToken, jwtConfig.getRefreshKey()).getId();
         String key = "auth:refresh:token:" + tokenId;
         redisService.delete(key);
     }
