@@ -12,5 +12,5 @@ public interface IAdminService {
     List<UserSummary> getUsers(int page, int rows);
     List<UserSummary> getUsersByGender(int page, int rows, String gender);
     void revokeTokens(String username);
-    void setUserActivation(String username ,boolean isActivated);
+    void setUserEnabled(String username, boolean isEnabled);
 }

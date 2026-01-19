@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import sk.mvp.user_service.common.exception.data.ErrorType;
 import sk.mvp.user_service.common.exception.data.QErrorResponse;
-import sk.mvp.user_service.common.exception.data.Error;
+import sk.mvp.user_service.common.exception.data.QError;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -44,10 +44,11 @@ public class GlobalExceptionHandler {
 
     }
 
+    //TODO: remove message paramter
 
     private ResponseEntity<QErrorResponse> createQErrorResponse(ErrorType errorType, String message, String path,
                                                                 Map<String, Object> data) {
-        Error error = new Error(errorType, message, path, data);
-        return new ResponseEntity<>(new QErrorResponse(error), new HttpHeaders(), error.getStatusCode());
+        QError QError = new QError(errorType, path, data);
+        return new ResponseEntity<>(new QErrorResponse(QError), new HttpHeaders(), QError.getStatusCode());
     }
 }

@@ -1,5 +1,6 @@
 package sk.mvp.user_service.common.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -13,26 +14,31 @@ import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
-import sk.mvp.user_service.auth.service.impl.CustomUserDetailsService;
-import sk.mvp.user_service.common.filter.JwtAuthFilter;
+import sk.mvp.user_service.auth.service.impl.QUserDetailsService;
+import sk.mvp.user_service.common.filter.security.JwtAuthFilter;
+import sk.mvp.user_service.common.filter.security.QUsernamePasswordAuthFilter;
+import sk.mvp.user_service.common.reddis.IRedisService;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-    private CustomUserDetailsService customUserDetailsService;
+    private QUserDetailsService qUserDetailsService;
     private JwtAuthFilter jwtAuthFilter;
 
-    public SecurityConfig(CustomUserDetailsService customUserDetailsService, JwtAuthFilter jwtAuthFilter) {
-        this.customUserDetailsService = customUserDetailsService;
+    public SecurityConfig(QUserDetailsService qUserDetailsService,
+                          JwtAuthFilter jwtAuthFilter) {
+        this.qUserDetailsService = qUserDetailsService;
         this.jwtAuthFilter = jwtAuthFilter;
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, SessionRegistry sessionRegistry) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, QUsernamePasswordAuthFilter qUsernamePasswordAuthFilter) throws Exception {
         http
 
                 // csfr simple config
@@ -60,8 +66,19 @@ public class SecurityConfig {
                 );
         // Add the JWT Token filter before the UsernamePasswordAuthenticationFilter
                 http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                http.addFilterAt(qUsernamePasswordAuthFilter, UsernamePasswordAuthenticationFilter.class);
                 http.redirectToHttps(withDefaults());
         return http.build();
+    }
+    @Bean
+    public QUsernamePasswordAuthFilter qUsernamePasswordAuthFilter(
+            AuthenticationManager authenticationManager,
+            AuthenticationFailureHandler successHandler,
+            AuthenticationSuccessHandler failureHandler,
+            ObjectMapper objectMapper,
+            IRedisService redisService) {
+        return new QUsernamePasswordAuthFilter(authenticationManager, failureHandler, successHandler, objectMapper, redisService
+        );
     }
     @Bean
     public SessionRegistry sessionRegistry() {

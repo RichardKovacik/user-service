@@ -82,7 +82,7 @@ public class UserServiceImpl implements IUserService {
                 //check if email already exists
                 Optional<User> foundedUser = userRepository.findByEmail(contactDto.email() );
                 if (foundedUser.isPresent()) {
-                    throw new ApplicationException(String.format("Email %s is already in use", contactDto.email()), ErrorType.EMAIL_DUPLICATED, null);
+                    throw new ApplicationException(String.format("Email is already in use", contactDto.email()), ErrorType.EMAIL_DUPLICATED, null);
                 }
                 user.getContact().setEmail(contactDto.email());
             }

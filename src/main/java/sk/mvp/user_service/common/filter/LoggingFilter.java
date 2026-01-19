@@ -11,7 +11,7 @@ import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.ContentCachingResponseWrapper;
-import sk.mvp.user_service.common.logging.CachedHttpServletRequest;
+import sk.mvp.user_service.common.http.CachedHttpServletRequest;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;

@@ -137,7 +137,11 @@ public class AdminServiceImpl implements IAdminService {
     }
 
     @Override
-    public void setUserActivation(String username, boolean isActivated) {
+    @Transactional
+    public void setUserEnabled(String username, boolean isEnabled) {
+        userRepository.setEnabled(username, isEnabled);
+        // remove actual user sessions
+        this.revokeTokens(username);
 
     }
 }

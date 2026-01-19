@@ -71,7 +71,7 @@ public class AuthServiceImpl implements IAuthService {
                     )
             );
         }catch (BadCredentialsException | UsernameNotFoundException e) {
-            throw new ApplicationException(e.getMessage(), ErrorType.INVALID_CREDENTIAL, null);
+            throw new ApplicationException(e.getMessage(), ErrorType.AUTH_INVALID_CREDENTIALS, null);
 //            Optional<String> value = redisService.get(loginAttemptsKey);
 //            if (value.isEmpty()) {
 //                //setup reddis collection with 5 min TTL

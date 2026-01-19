@@ -47,6 +47,9 @@ public class User {
     @Column(name ="token_version", nullable = false)
     private int tokenVersion = 1;
 
+    @Column(name = "enabled", nullable = false)
+    private boolean enabled = true;
+
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "user_role",
@@ -156,5 +159,13 @@ public class User {
 
     public void setTokenVersion(int tokenVersion) {
         this.tokenVersion = tokenVersion;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 }

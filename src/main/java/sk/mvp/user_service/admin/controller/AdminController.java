@@ -1,11 +1,14 @@
 package sk.mvp.user_service.admin.controller;
 
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.session.SessionInformation;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.web.bind.annotation.*;
+import sk.mvp.user_service.admin.dto.UserEnabledReq;
 import sk.mvp.user_service.admin.dto.UserSummary;
 import sk.mvp.user_service.admin.service.IAdminService;
+import sk.mvp.user_service.user.dto.UserProfile;
 import sk.mvp.user_service.user.service.IUserService;
 import sk.mvp.user_service.auth.service.IAuthService;
 
@@ -27,12 +30,20 @@ public class AdminController {
         return ResponseEntity.ok().build();
     }
 
+    @PatchMapping(value = "/user/enable")
+    public ResponseEntity<?> setUserEnabled(@RequestParam String username,
+                                            @RequestBody @Valid UserEnabledReq userEnabledReq) {
+        adminService.setUserEnabled(username, userEnabledReq.enabled());
+        return ResponseEntity.ok().build();
+    }
+
     @PostMapping(value = "/assignRole")
     public ResponseEntity<?> assignRole(@RequestParam String username, @RequestParam String roleName) {
         adminService.assignRoleToUser(username, roleName);
         return ResponseEntity.ok().build();
     }
 
+    // excplicitly logout user in all sessions, ivalidate all sessions
     @DeleteMapping(value = "/removeRole")
     public ResponseEntity<?> removeRole(@RequestParam String username, @RequestParam String roleName) {
         adminService.unassignRoleFromUser(username, roleName);

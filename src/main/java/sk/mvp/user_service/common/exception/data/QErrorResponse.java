@@ -3,17 +3,17 @@ package sk.mvp.user_service.common.exception.data;
 import java.io.Serializable;
 
 public class QErrorResponse implements Serializable {
-    private sk.mvp.user_service.common.exception.data.Error error;
+    private QError QError;
 
-    public QErrorResponse(sk.mvp.user_service.common.exception.data.Error error) {
-        this.error = error;
+    public QErrorResponse(QError QError) {
+        this.QError = QError;
     }
 
-    public sk.mvp.user_service.common.exception.data.Error getError() {
-        return error;
+    public QError getError() {
+        return QError;
     }
 
-    public void setError(Error error) {
-        this.error = error;
+    public void setError(QError QError) {
+        this.QError = QError;
     }
 }

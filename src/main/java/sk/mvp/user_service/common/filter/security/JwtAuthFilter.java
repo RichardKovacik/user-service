@@ -1,4 +1,4 @@
-package sk.mvp.user_service.common.filter;
+package sk.mvp.user_service.common.filter.security;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

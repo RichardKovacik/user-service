@@ -1,4 +1,4 @@
-package sk.mvp.user_service.common.logging;
+package sk.mvp.user_service.common.http;
 
 import jakarta.servlet.ServletInputStream;
 import jakarta.servlet.http.HttpServletRequest;

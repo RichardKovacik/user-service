@@ -16,6 +16,7 @@ public class UserDetail implements UserDetails {
     private String username;
     private String password;
     private List<SimpleGrantedAuthority> authorities;
+    private boolean enabled;
 
     public UserDetail(String username, List<String> roles) {
         this.username = username;
@@ -27,6 +28,7 @@ public class UserDetail implements UserDetails {
         this.username = user.getUsername();
         this.password = user.getPassword();
         this.authorities = mapRolesToAuthorities(user.getRoles());
+        this.enabled = user.isEnabled();
 
     }
 
@@ -78,5 +80,10 @@ public class UserDetail implements UserDetails {
     @Override
     public int hashCode() {
         return Objects.hash(id, username);
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return this.enabled;
     }
 }
