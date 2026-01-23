@@ -35,40 +35,40 @@ public class AuthController {
         return authService.loginUser(loginReq);
     }
 
-    /**
-     * Endpint calls from client web apps
-     * using http-only cookie
-     * @param loginReq
-     * @return tokens pair in cookie for browser
-     */
-    @PostMapping(value = "/web/login")
-    public ResponseEntity<?> webLogin(@RequestBody @Valid LoginReq loginReq, HttpServletResponse response) {
-        TokenPair tokenPair = authService.loginUser(loginReq);
+//    /**
+//     * Endpint calls from client web apps
+//     * using http-only cookie
+//     * @param loginReq
+//     * @return tokens pair in cookie for browser
+//     */
+//    @PostMapping(value = "/web/login")
+//    public ResponseEntity<?> webLogin(@RequestBody @Valid LoginReq loginReq, HttpServletResponse response) {
+       // TokenPair tokenPair = authService.loginUser(loginReq);
         //place refresh token in httopnly cookie
-        ResponseCookie refreshCookie = CookieUtils.create("refresh_token",
-                tokenPair.getRefreshToken(),
-                jwtConfig.getCookieDomain(),
-                Duration.ofMillis(jwtConfig.getRefreshTokenExpiration()),
-                jwtConfig.isCookieIsHttpOnly(),
-                jwtConfig.isCookieIsSecure(),
-                jwtConfig.getRefreshTokenCookiePath(),
-                jwtConfig.getCoikieSameSite()
-        );
-        //place acces token in http-only cookie
-        ResponseCookie accessCookie = CookieUtils.create("access_token",
-                tokenPair.getAccessToken(),
-                jwtConfig.getCookieDomain(),
-                Duration.ofMillis(jwtConfig.getAccesTokenExpiration()),
-                jwtConfig.isCookieIsHttpOnly(),
-                jwtConfig.isCookieIsSecure(),
-                "/",
-                jwtConfig.getCoikieSameSite()
-        );
-        response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
-        response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
+//        ResponseCookie refreshCookie = CookieUtils.create("refresh_token",
+//                tokenPair.getRefreshToken(),
+//                jwtConfig.getCookieDomain(),
+//                Duration.ofMillis(jwtConfig.getRefreshTokenExpiration()),
+//                jwtConfig.isCookieIsHttpOnly(),
+//                jwtConfig.isCookieIsSecure(),
+//                jwtConfig.getRefreshTokenCookiePath(),
+//                jwtConfig.getCoikieSameSite()
+//        );
+//        //place acces token in http-only cookie
+//        ResponseCookie accessCookie = CookieUtils.create("access_token",
+//                tokenPair.getAccessToken(),
+//                jwtConfig.getCookieDomain(),
+//                Duration.ofMillis(jwtConfig.getAccesTokenExpiration()),
+//                jwtConfig.isCookieIsHttpOnly(),
+//                jwtConfig.isCookieIsSecure(),
+//                "/",
+//                jwtConfig.getCoikieSameSite()
+//        );
+//        response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
+//        response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
 
-        return ResponseEntity.ok().build();
-    }
+//        return ResponseEntity.ok().build();
+//    }
 
     @PostMapping(value = "/refresh/tokens")
     public TokenPair refreshTokens(@RequestBody @Valid RefreshTokenReq refreshTokenReq) {

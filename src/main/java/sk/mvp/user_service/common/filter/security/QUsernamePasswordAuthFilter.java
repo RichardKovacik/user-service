@@ -55,7 +55,8 @@ public class QUsernamePasswordAuthFilter extends UsernamePasswordAuthenticationF
         }catch (IOException e){
             throw new InvalidInputDataException("Bad Login Request data");
         }
-            //Manuálna validácia formátu
+        // TODO: do validiation encapsulated inside logi req DTO
+        //Manuálna validácia formátu,
         if (loginReq.username() == null || loginReq.username().isEmpty()
                 || loginReq.password() == null || loginReq.password().isEmpty()) {
             // Vyhodíme špeciálnu výnimku, ktorú spracuje Failure Handler
