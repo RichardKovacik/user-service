@@ -8,13 +8,13 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import sk.mvp.common.CookieUtils;
 import sk.mvp.user_service.auth.dto.LoginReq;
 import sk.mvp.user_service.auth.dto.RefreshTokenReq;
 import sk.mvp.user_service.auth.dto.RegistrationReq;
 import sk.mvp.user_service.auth.dto.TokenPair;
 import sk.mvp.user_service.auth.service.IAuthService;
 import sk.mvp.user_service.common.config.JwtConfig;
-import sk.mvp.user_service.common.utils.CookieUtils;
 import sk.mvp.user_service.user.dto.UserProfile;
 
 import java.time.Duration;

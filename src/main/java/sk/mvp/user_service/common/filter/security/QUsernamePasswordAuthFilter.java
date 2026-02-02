@@ -20,7 +20,6 @@ import sk.mvp.user_service.common.reddis.IRedisService;
 
 import java.io.IOException;
 
-@Component
 public class QUsernamePasswordAuthFilter extends UsernamePasswordAuthenticationFilter {
     private final ObjectMapper objectMapper;
     private IRedisService redisService;

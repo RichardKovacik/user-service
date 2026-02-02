@@ -6,7 +6,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sk.mvp.user_service.common.config.JwtConfig;
 import sk.mvp.user_service.user.dto.UserProfile;
-import sk.mvp.user_service.auth.dto.RegistrationReq;
 import sk.mvp.user_service.user.service.IUserService;
 import sk.mvp.user_service.common.utils.JwtUtil;
 

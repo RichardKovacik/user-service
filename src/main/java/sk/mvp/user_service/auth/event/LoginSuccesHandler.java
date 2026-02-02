@@ -1,4 +1,4 @@
-package sk.mvp.user_service.event.security;
+package sk.mvp.user_service.auth.event;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -6,18 +6,16 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
+import sk.mvp.common.CookieUtils;
 import sk.mvp.user_service.auth.dto.TokenPair;
 import sk.mvp.user_service.auth.dto.UserDetail;
 import sk.mvp.user_service.auth.service.ITokenService;
 import sk.mvp.user_service.common.config.JwtConfig;
 import sk.mvp.user_service.common.constants.AuthConts;
 import sk.mvp.user_service.common.reddis.IRedisService;
-import sk.mvp.user_service.common.utils.CookieUtils;
 
-import javax.imageio.event.IIOReadProgressListener;
 import java.io.IOException;
 import java.time.Duration;
 

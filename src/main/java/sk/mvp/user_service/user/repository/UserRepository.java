@@ -18,14 +18,14 @@ public interface UserRepository extends JpaRepository <User, Long> {
     Optional<User> findByFirstName(String username);
     Optional<User> findByUsername(String username);
     @Query("select u from User u JOIN u.contact c where c.email = :email")
-    Optional<User> findByEmail(String email);
+    Optional<User> findByEmail(@Param("email") String email);
 
     @Modifying
     @Query("update User u set u.enabled = :flag where u.username = :username")
-    void setEnabled(String username, boolean flag);
+    void setEnabled(@Param("username") String username, @Param("flag") boolean flag);
 
     @Query("select u.tokenVersion from User u where u.username = :username")
-    Optional<Integer> getTokenVersion(String username);
+    Optional<Integer> getTokenVersion(@Param("username") String username);
 
     @Modifying
     @Query("update User u set u.tokenVersion = u.tokenVersion + 1 where u.username = :username")
@@ -41,7 +41,7 @@ public interface UserRepository extends JpaRepository <User, Long> {
             "(select c.user.id" +
             " from Contact c" +
             " where c.email = :email)")
-    void deleteUserByEmail(String email);
+    void deleteUserByEmail(@Param("email") String email);
 
     Page<UserSummaryProjection> findAllProjectedBy(Pageable pageable);
     Page<UserSummaryProjection> findAllByGender(Gender gender, Pageable pageable);

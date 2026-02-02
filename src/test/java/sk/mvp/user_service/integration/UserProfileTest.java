@@ -7,18 +7,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.token.TokenService;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import sk.mvp.user_service.TestContainerConfig;
-import sk.mvp.user_service.auth.service.impl.TokenServiceImpl;
 import sk.mvp.user_service.common.config.JwtConfig;
 import sk.mvp.user_service.common.exception.data.ErrorType;
 import sk.mvp.user_service.common.utils.JwtUtil;
@@ -27,7 +24,6 @@ import sk.mvp.user_service.user.dto.ContactResp;
 import sk.mvp.user_service.user.dto.UserProfile;
 import sk.mvp.user_service.user.repository.UserRepository;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import sk.mvp.user_service.user.service.UserServiceImpl;
 
 import java.util.UUID;
 

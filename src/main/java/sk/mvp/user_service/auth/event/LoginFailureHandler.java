@@ -1,4 +1,4 @@
-package sk.mvp.user_service.event.security;
+package sk.mvp.user_service.auth.event;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
@@ -10,15 +10,12 @@ import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.stereotype.Component;
-import sk.mvp.user_service.auth.dto.LoginReq;
 import sk.mvp.user_service.common.constants.AuthConts;
 import sk.mvp.user_service.common.exception.AccountLockedExp;
 import sk.mvp.user_service.common.exception.auth.InvalidInputDataException;
-import sk.mvp.user_service.common.exception.auth.UserLockedException;
 import sk.mvp.user_service.common.exception.data.ErrorType;
 import sk.mvp.user_service.common.exception.data.QError;
 import sk.mvp.user_service.common.exception.data.QErrorResponse;
-import sk.mvp.user_service.common.http.CachedHttpServletRequest;
 import sk.mvp.user_service.common.reddis.IRedisService;
 
 import java.io.IOException;

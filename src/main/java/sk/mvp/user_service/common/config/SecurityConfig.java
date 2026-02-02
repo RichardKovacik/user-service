@@ -67,7 +67,7 @@ public class SecurityConfig {
         // Add the JWT Token filter before the UsernamePasswordAuthenticationFilter
                 http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
                 http.addFilterAt(qUsernamePasswordAuthFilter, UsernamePasswordAuthenticationFilter.class);
-                http.redirectToHttps(withDefaults());
+        http.requiresChannel(channel -> channel.anyRequest().requiresSecure());
         return http.build();
     }
     @Bean

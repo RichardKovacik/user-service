@@ -1,8 +1,6 @@
 package sk.mvp.user_service.common.utils;
 
 import io.jsonwebtoken.*;
-import org.springframework.stereotype.Component;
-import sk.mvp.user_service.common.config.JwtConfig;
 import sk.mvp.user_service.auth.dto.UserDetail;
 import sk.mvp.user_service.common.exception.InvalidTokenException;
 
