@@ -1,6 +1,8 @@
 package sk.mvp.user_service.common.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -10,12 +12,14 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import sk.mvp.user_service.common.exception.data.ErrorType;
 import sk.mvp.user_service.common.exception.data.QErrorResponse;
 import sk.mvp.user_service.common.exception.data.QError;
+import sk.mvp.user_service.common.filter.LoggingFilter;
 
 import java.util.HashMap;
 import java.util.Map;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
+    private static final Logger log = LoggerFactory.getLogger(LoggingFilter.class);
 
     // handle custom application exceptions
     @ExceptionHandler(ApplicationException.class)
@@ -26,6 +30,7 @@ public class GlobalExceptionHandler {
     // handle default runtime exceptions
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<QErrorResponse> handleOtherRuntime(RuntimeException ex, HttpServletRequest request) {
+        log.error(ErrorType.INTERNAL_SERVER_ERROR.toString(), ex);
         return createQErrorResponse(ErrorType.INTERNAL_SERVER_ERROR, ex.getMessage(), request.getRequestURI(), null);
     }
 

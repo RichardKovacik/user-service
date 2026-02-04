@@ -26,6 +26,8 @@ public class RegistrationReq {
         this.genderCode = genderCode;
     }
 
+    public RegistrationReq() {
+    }
 
     public String getUsername() {
         return username;
