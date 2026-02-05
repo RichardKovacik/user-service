@@ -38,15 +38,14 @@ public class User {
     @Convert(converter = GenderConverter.class)
     private Gender gender;
 
-    private boolean activated = false;
+    // true if email has been verfied
+    private boolean emailVerified = false;
 
-    @Column(name = "activation_token")
-    private String activationToken;
-
-    //init value sets to 1
+    //init value sets to 1, accesTokenVersion
     @Column(name ="token_version", nullable = false)
     private int tokenVersion = 1;
 
+    // false if user was disabled by admin
     @Column(name = "enabled", nullable = false)
     private boolean enabled = true;
 
@@ -93,22 +92,6 @@ public class User {
 
     public Gender getGender() {
         return gender;
-    }
-
-    public boolean isActivated() {
-        return activated;
-    }
-
-    public void setActivated(boolean activated) {
-        this.activated = activated;
-    }
-
-    public String getActivationToken() {
-        return activationToken;
-    }
-
-    public void setActivationToken(String activationToken) {
-        this.activationToken = activationToken;
     }
 
     public void setGender(Gender gender) {
@@ -167,5 +150,13 @@ public class User {
 
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
+    }
+
+    public boolean isEmailVerified() {
+        return emailVerified;
+    }
+
+    public void setEmailVerified(boolean emailVerified) {
+        this.emailVerified = emailVerified;
     }
 }

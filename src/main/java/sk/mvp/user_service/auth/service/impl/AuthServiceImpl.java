@@ -8,6 +8,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import sk.mvp.user_service.auth.dto.RegistrationReq;
 import sk.mvp.user_service.auth.service.IAuthService;
@@ -21,12 +22,16 @@ import sk.mvp.user_service.common.reddis.IRedisService;
 import sk.mvp.user_service.entity.Contact;
 import sk.mvp.user_service.entity.Gender;
 import sk.mvp.user_service.entity.User;
+import sk.mvp.user_service.entity.VerificationToken;
 import sk.mvp.user_service.user.dto.UserProfile;
 import sk.mvp.user_service.user.repository.UserRepository;
+import sk.mvp.user_service.user.repository.VerificationTokenRepository;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class AuthServiceImpl implements IAuthService {
@@ -34,15 +39,18 @@ public class AuthServiceImpl implements IAuthService {
     private AuthenticationManager authenticationManager;
     private UserRepository userRepository;
     private IRedisService redisService;
+    private VerificationTokenRepository verificationTokenRepository;
 
     public AuthServiceImpl(ITokenService jwtService,
                            AuthenticationManager authenticationManager,
                            UserRepository userRepository,
-                           IRedisService redisService) {
+                           IRedisService redisService,
+                           VerificationTokenRepository verificationTokenRepository) {
         this.jwtService = jwtService;
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.redisService = redisService;
+        this.verificationTokenRepository = verificationTokenRepository;
     }
 
     @Override
@@ -122,9 +130,13 @@ public class AuthServiceImpl implements IAuthService {
                 Gender.getValidGenderFromCode(registrationReq.getGenderCodeAsCharacter()));
         //set user to new contact
         contact.setUser(user);
+        //save verification token
+        Instant expiresAt = Instant.now().plus(Duration.ofDays(2));
+        VerificationToken verificationToken = new VerificationToken(UUID.randomUUID().toString(), expiresAt, user);
         // save user to DB
         User savedUser = userRepository.save(user);
-
+        // save verificationToken to DB
+        this.verificationTokenRepository.save(verificationToken);
         return new UserProfile(savedUser);
     }
 
