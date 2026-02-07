@@ -10,7 +10,7 @@ import sk.mvp.user_service.common.config.JwtConfig;
 import sk.mvp.user_service.common.exception.data.ErrorType;
 import sk.mvp.user_service.auth.dto.UserDetail;
 import sk.mvp.user_service.auth.dto.TokenPair;
-import sk.mvp.user_service.common.exception.ApplicationException;
+import sk.mvp.user_service.common.exception.QApplicationException;
 import sk.mvp.user_service.common.exception.InvalidTokenException;
 import sk.mvp.user_service.entity.User;
 import sk.mvp.user_service.user.repository.UserRepository;
@@ -74,7 +74,7 @@ public class TokenServiceImpl implements ITokenService {
         //check if refresh is in whitelist
         String refreshKey = "auth:refresh:token:"+claims.getId();
         String userName = String.valueOf(redisService.get(refreshKey)
-                .orElseThrow(()-> new ApplicationException(
+                .orElseThrow(()-> new QApplicationException(
                         "Refresh token reuse detected",
                         ErrorType.TOKEN_REUSED_DETECTED,
                         null)));
@@ -84,7 +84,7 @@ public class TokenServiceImpl implements ITokenService {
 
         //get userdetai from db
         User user = userRepository.findByUsername(userName)
-                .orElseThrow(() -> new ApplicationException("User with username " + userName + " not found", ErrorType.USER_NOT_FOUND, null));
+                .orElseThrow(() -> new QApplicationException("User with username " + userName + " not found", ErrorType.USER_NOT_FOUND, null));
 
         //generate new pairs and also add in reddis whotelist noew refresh token
         return generateTokenPair(new UserDetail(user));
@@ -104,7 +104,7 @@ public class TokenServiceImpl implements ITokenService {
             Claims claims = JwtUtil.parseClaimsFromJwtToken(accessToken, jwtConfig.getAccesKey());
             String key = "auth:access:blacklist:" + claims.getId();
             if (redisService.has(key)) {
-                throw new ApplicationException("Access token is in blacklist. Possible security breach !!", ErrorType.TOKEN_REUSED_DETECTED, null);
+                throw new QApplicationException("Access token is in blacklist. Possible security breach !!", ErrorType.TOKEN_REUSED_DETECTED, null);
             }
 
         }catch (Exception e) {
@@ -143,7 +143,7 @@ public class TokenServiceImpl implements ITokenService {
         }
         // cache is empty, try hit real db
         int tokenVersion = userRepository.getTokenVersion(userName)
-                .orElseThrow(() -> new ApplicationException("User with username " + userName + " not found", ErrorType.USER_NOT_FOUND, null));
+                .orElseThrow(() -> new QApplicationException("User with username " + userName + " not found", ErrorType.USER_NOT_FOUND, null));
         // save value to the redis cache
         redisService.set(key,
                 String.valueOf(tokenVersion),

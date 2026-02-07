@@ -3,12 +3,14 @@ package sk.mvp.user_service.auth.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sk.mvp.common.CookieUtils;
+import sk.mvp.user_service.auth.dto.VerificationTokenResponse;
 import sk.mvp.user_service.auth.dto.LoginReq;
 import sk.mvp.user_service.auth.dto.RefreshTokenReq;
 import sk.mvp.user_service.auth.dto.RegistrationReq;
@@ -113,6 +115,13 @@ public class AuthController {
     public UserProfile createUser(@RequestBody @Valid RegistrationReq registrationReq) {
         return authService.registerUser(registrationReq);
     }
+
+    @GetMapping(value = "/email/verify")
+    public VerificationTokenResponse verifyToken(@RequestParam("token") @NotNull @NotBlank String token) {
+        return authService.verifyEmailVerificationToken(token);
+    }
+
+
 
     @PostMapping(value = "/web/logout")
     public ResponseEntity<?> logoutUser(@NotNull @CookieValue(name = "refresh_token") String refreshToken,

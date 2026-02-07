@@ -22,8 +22,8 @@ public class GlobalExceptionHandler {
     private static final Logger log = LoggerFactory.getLogger(LoggingFilter.class);
 
     // handle custom application exceptions
-    @ExceptionHandler(ApplicationException.class)
-    public ResponseEntity<QErrorResponse> handleCustomAplicationException(ApplicationException ex, HttpServletRequest request) {
+    @ExceptionHandler(QApplicationException.class)
+    public ResponseEntity<QErrorResponse> handleCustomAplicationException(QApplicationException ex, HttpServletRequest request) {
         return createQErrorResponse(ex.getErrorType(), ex.getMessage(), request.getRequestURI(), ex.getData());
     }
 

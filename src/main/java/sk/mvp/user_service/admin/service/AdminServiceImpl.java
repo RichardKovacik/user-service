@@ -6,7 +6,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import sk.mvp.user_service.admin.dto.UserSummary;
 import sk.mvp.user_service.auth.service.ITokenService;
-import sk.mvp.user_service.common.exception.ApplicationException;
+import sk.mvp.user_service.common.exception.QApplicationException;
 import sk.mvp.user_service.common.exception.data.ErrorType;
 import sk.mvp.user_service.entity.Gender;
 import sk.mvp.user_service.entity.Role;
@@ -42,13 +42,13 @@ public class AdminServiceImpl implements IAdminService {
         }
 
         User user = userRepository.findByUsername(username).orElseThrow(() ->
-                new ApplicationException("User with username " + username + " not found", ErrorType.USER_NOT_FOUND, null));
+                new QApplicationException("User with username " + username + " not found", ErrorType.USER_NOT_FOUND, null));
 
         Role role = roleRepository.findByName(roleName).orElseThrow(
-                () -> new ApplicationException("Role with name " + roleName + " not found", ErrorType.ROLE_NOT_FOUND, null));
+                () -> new QApplicationException("Role with name " + roleName + " not found", ErrorType.ROLE_NOT_FOUND, null));
 
         if (user.getRoles().contains(role)) {
-            throw new ApplicationException(String.format("User %s already has %s role", username, roleName), ErrorType.ROLE_ALREADY_ASSIGNED, null);
+            throw new QApplicationException(String.format("User %s already has %s role", username, roleName), ErrorType.ROLE_ALREADY_ASSIGNED, null);
         }
 
         user.getRoles().add(role);
@@ -66,10 +66,10 @@ public class AdminServiceImpl implements IAdminService {
         }
 
         User user = userRepository.findByUsername(username).orElseThrow(() ->
-                new ApplicationException("User with username " + username + " not found", ErrorType.USER_NOT_FOUND, null));
+                new QApplicationException("User with username " + username + " not found", ErrorType.USER_NOT_FOUND, null));
 
         Role role = roleRepository.findByName(roleName).orElseThrow(
-                () -> new ApplicationException("Role with name " + roleName + "not found", ErrorType.ROLE_NOT_FOUND, null));
+                () -> new QApplicationException("Role with name " + roleName + "not found", ErrorType.ROLE_NOT_FOUND, null));
 
         if (!user.getRoles().contains(role)) {
             throw new RuntimeException("User does not have this role");
@@ -86,7 +86,7 @@ public class AdminServiceImpl implements IAdminService {
             throw new IllegalArgumentException("User name cannot be null or empty");
         }
         User user = userRepository.findByUsername(userName).orElseThrow(() ->
-                new ApplicationException("User with username " + userName + " not found", ErrorType.USER_NOT_FOUND, null));
+                new QApplicationException("User with username " + userName + " not found", ErrorType.USER_NOT_FOUND, null));
         userRepository.delete(user);
         //TODO: log user has been deleted
     }

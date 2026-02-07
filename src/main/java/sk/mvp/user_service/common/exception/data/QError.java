@@ -57,8 +57,10 @@ public class QError {
             case AUTH_INVALID_CREDENTIALS -> this.message = "Invalid username or password.";
             case ROLE_NOT_FOUND -> this.message = "Role not found.";
             case ROLE_ALREADY_ASSIGNED -> this.message = "User has already asigghned requested role.";
-            case AUTH_USER_DISABLED -> this.message = "User has been disabled by admin.";
+            case AUTH_USER_DISABLED -> this.message = "User account is disabled.";
             case AUTH_USER_FAILED -> this.message = "Authentification of user failed";
+            case VERIFICATION_TOKEN_INVALID -> this.message = "Verification token is invalid.";
+            case VERIFICATION_TOKEN_EXPIRED -> this.message = "Verification token is expired.";
         }
     }
 

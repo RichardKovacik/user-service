@@ -49,7 +49,8 @@ public class SecurityConfig {
                                 "/api/auth/login",
                                 "/api/auth/web/login",
                                 "/api/auth/registration",
-                                "/api/auth/refresh").permitAll()
+                                "/api/auth/refresh",
+                                "/api/auth/email/verify").permitAll()
                         .requestMatchers("/api/auth/logout").authenticated()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/profile/**").hasAnyRole("USER", "ADMIN")

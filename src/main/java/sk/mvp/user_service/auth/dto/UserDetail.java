@@ -17,6 +17,7 @@ public class UserDetail implements UserDetails {
     private String password;
     private List<SimpleGrantedAuthority> authorities;
     private boolean enabled;
+    private boolean emailVerified;
 
     public UserDetail(String username, List<String> roles) {
         this.username = username;
@@ -29,6 +30,7 @@ public class UserDetail implements UserDetails {
         this.password = user.getPassword();
         this.authorities = mapRolesToAuthorities(user.getRoles());
         this.enabled = user.isEnabled();
+        this.emailVerified = user.isEmailVerified();
 
     }
 
@@ -84,6 +86,7 @@ public class UserDetail implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return this.enabled;
+        return this.enabled && this.emailVerified;
     }
+
 }

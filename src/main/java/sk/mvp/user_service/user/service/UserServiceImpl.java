@@ -1,26 +1,16 @@
 package sk.mvp.user_service.user.service;
 
 import jakarta.transaction.Transactional;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import sk.mvp.user_service.common.exception.data.ErrorType;
-import sk.mvp.user_service.common.exception.ApplicationException;
-import sk.mvp.user_service.entity.Contact;
-import sk.mvp.user_service.entity.Gender;
-import sk.mvp.user_service.entity.Role;
+import sk.mvp.user_service.common.exception.QApplicationException;
 import sk.mvp.user_service.entity.User;
-import sk.mvp.user_service.projections.UserSummaryProjection;
 import sk.mvp.user_service.user.dto.ContactResp;
 import sk.mvp.user_service.user.dto.UserProfile;
-import sk.mvp.user_service.auth.dto.RegistrationReq;
-import sk.mvp.user_service.admin.dto.UserSummary;
 import sk.mvp.user_service.user.repository.RoleRepository;
 import sk.mvp.user_service.user.repository.UserRepository;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements IUserService {
@@ -36,7 +26,7 @@ public class UserServiceImpl implements IUserService {
     @Override
     @Transactional
     public UserProfile getUserByFirstName(String firstName) {
-        User user = userRepository.findByFirstName(firstName).orElseThrow(() -> new ApplicationException(
+        User user = userRepository.findByFirstName(firstName).orElseThrow(() -> new QApplicationException(
                 String.format("User with firstName %s not found",
                 firstName),
                 ErrorType.USER_NOT_FOUND, null));
@@ -47,7 +37,7 @@ public class UserServiceImpl implements IUserService {
     @Transactional
     public UserProfile getUserByEmail(String email) {
         User user = userRepository.findByEmail(email).orElseThrow(() ->
-                new ApplicationException("User with email " + email + " not found", ErrorType.USER_NOT_FOUND, null));
+                new QApplicationException("User with email " + email + " not found", ErrorType.USER_NOT_FOUND, null));
         return new UserProfile(user);
     }
 
@@ -55,7 +45,7 @@ public class UserServiceImpl implements IUserService {
     @Transactional
     public UserProfile getUserByUsername(String username) {
         User user = userRepository.findByUsername(username).orElseThrow(() ->
-                new ApplicationException("User with username " + username + " not found", ErrorType.USER_NOT_FOUND, null));
+                new QApplicationException("User with username " + username + " not found", ErrorType.USER_NOT_FOUND, null));
         return new UserProfile(user);
     }
 
@@ -66,7 +56,7 @@ public class UserServiceImpl implements IUserService {
             throw new IllegalArgumentException("User name cannot be null or empty");
         }
         User user = userRepository.findByUsername(userName).orElseThrow(() ->
-                new ApplicationException("User with username " + userName + " not found", ErrorType.USER_NOT_FOUND, null));
+                new QApplicationException("User with username " + userName + " not found", ErrorType.USER_NOT_FOUND, null));
 
         if (userProfileDTO.getFirstName() != null && !userProfileDTO.getFirstName().isEmpty()) {
             user.setFirstName(userProfileDTO.getFirstName());
@@ -82,7 +72,7 @@ public class UserServiceImpl implements IUserService {
                 //check if email already exists
                 Optional<User> foundedUser = userRepository.findByEmail(contactDto.email() );
                 if (foundedUser.isPresent()) {
-                    throw new ApplicationException(String.format("Email is already in use", contactDto.email()), ErrorType.EMAIL_DUPLICATED, null);
+                    throw new QApplicationException(String.format("Email is already in use", contactDto.email()), ErrorType.EMAIL_DUPLICATED, null);
                 }
                 user.getContact().setEmail(contactDto.email());
             }

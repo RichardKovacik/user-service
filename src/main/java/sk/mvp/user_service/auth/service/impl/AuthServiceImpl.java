@@ -5,18 +5,18 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import sk.mvp.user_service.auth.dto.RegistrationReq;
+import sk.mvp.user_service.auth.dto.VerificationTokenResponse;
 import sk.mvp.user_service.auth.service.IAuthService;
 import sk.mvp.user_service.auth.service.ITokenService;
 import sk.mvp.user_service.auth.dto.TokenPair;
 import sk.mvp.user_service.auth.dto.LoginReq;
+import sk.mvp.user_service.auth.service.IVerificationTokenService;
 import sk.mvp.user_service.common.constants.AuthConts;
-import sk.mvp.user_service.common.exception.ApplicationException;
+import sk.mvp.user_service.common.exception.QApplicationException;
 import sk.mvp.user_service.common.exception.data.ErrorType;
 import sk.mvp.user_service.common.reddis.IRedisService;
 import sk.mvp.user_service.entity.Contact;
@@ -25,13 +25,10 @@ import sk.mvp.user_service.entity.User;
 import sk.mvp.user_service.entity.VerificationToken;
 import sk.mvp.user_service.user.dto.UserProfile;
 import sk.mvp.user_service.user.repository.UserRepository;
-import sk.mvp.user_service.user.repository.VerificationTokenRepository;
 
-import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 public class AuthServiceImpl implements IAuthService {
@@ -39,18 +36,18 @@ public class AuthServiceImpl implements IAuthService {
     private AuthenticationManager authenticationManager;
     private UserRepository userRepository;
     private IRedisService redisService;
-    private VerificationTokenRepository verificationTokenRepository;
+    private IVerificationTokenService verificationTokenService;
 
     public AuthServiceImpl(ITokenService jwtService,
                            AuthenticationManager authenticationManager,
                            UserRepository userRepository,
                            IRedisService redisService,
-                           VerificationTokenRepository verificationTokenRepository) {
+                           IVerificationTokenService verificationTokenService) {
         this.jwtService = jwtService;
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.redisService = redisService;
-        this.verificationTokenRepository = verificationTokenRepository;
+        this.verificationTokenService = verificationTokenService;
     }
 
     @Override
@@ -65,7 +62,7 @@ public class AuthServiceImpl implements IAuthService {
 
         //if user is locked throw exception
         if (result == -1) {
-            throw new ApplicationException("You have tried too many times, please try again later.",
+            throw new QApplicationException("You have tried too many times, please try again later.",
                     ErrorType.TOO_MANY_REQUESTS,
                     null);
         }
@@ -79,7 +76,7 @@ public class AuthServiceImpl implements IAuthService {
                     )
             );
         }catch (BadCredentialsException | UsernameNotFoundException e) {
-            throw new ApplicationException(e.getMessage(), ErrorType.AUTH_INVALID_CREDENTIALS, null);
+            throw new QApplicationException(e.getMessage(), ErrorType.AUTH_INVALID_CREDENTIALS, null);
 //            Optional<String> value = redisService.get(loginAttemptsKey);
 //            if (value.isEmpty()) {
 //                //setup reddis collection with 5 min TTL
@@ -130,13 +127,10 @@ public class AuthServiceImpl implements IAuthService {
                 Gender.getValidGenderFromCode(registrationReq.getGenderCodeAsCharacter()));
         //set user to new contact
         contact.setUser(user);
-        //save verification token
-        Instant expiresAt = Instant.now().plus(Duration.ofDays(2));
-        VerificationToken verificationToken = new VerificationToken(UUID.randomUUID().toString(), expiresAt, user);
         // save user to DB
         User savedUser = userRepository.save(user);
         // save verificationToken to DB
-        this.verificationTokenRepository.save(verificationToken);
+        this.verificationTokenService.createVerificationToken(savedUser);
         return new UserProfile(savedUser);
     }
 
@@ -148,12 +142,37 @@ public class AuthServiceImpl implements IAuthService {
         jwtService.revokeAccessToken(accessToken);
     }
 
+    @Transactional
+    @Override
+    public VerificationTokenResponse verifyEmailVerificationToken(String verificationToken) {
+        VerificationToken foundedToken = verificationTokenService.getVerificationToken(verificationToken);
+
+        User user = foundedToken.getUser();
+        if (user.isEmailVerified()) {
+            return new VerificationTokenResponse("Email is already verified");
+        }
+
+        if (foundedToken.getExpiresAt().isBefore(Instant.now())) {
+            throw new QApplicationException(ErrorType.VERIFICATION_TOKEN_EXPIRED);
+        }
+
+        if (foundedToken.isUsed()) {
+            throw new QApplicationException(ErrorType.VERIFICATION_TOKEN_INVALID);
+
+        }
+        // hibernate has persistance context, and in the end save updted obejects to db
+        foundedToken.setUsed(true);
+        user.setEmailVerified(true);
+
+        return new VerificationTokenResponse("Email successfully verified");
+    }
+
 
     // check if emails is not used another user
     private void checkEmailIsNotUsed(String email) {
         Optional<User> user = userRepository.findByEmail(email);
         if (user.isPresent()) {
-            throw new ApplicationException(String.format("Email %s is already in use", email), ErrorType.EMAIL_DUPLICATED, null);
+            throw new QApplicationException(String.format("Email %s is already in use", email), ErrorType.EMAIL_DUPLICATED, null);
         }
     }
 }

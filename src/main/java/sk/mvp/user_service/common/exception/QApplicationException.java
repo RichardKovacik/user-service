@@ -4,14 +4,18 @@ import sk.mvp.user_service.common.exception.data.ErrorType;
 
 import java.util.Map;
 
-public class ApplicationException extends RuntimeException {
+public class QApplicationException extends RuntimeException {
     private ErrorType errorType;
     private Map<String, Object> data;
 
-    public ApplicationException(String message, ErrorType errorType, Map<String, Object> data) {
+    public QApplicationException(String message, ErrorType errorType, Map<String, Object> data) {
         super(message);
         this.errorType = errorType;
         this.data = data;
+    }
+
+    public QApplicationException(ErrorType errorType) {
+        this.errorType = errorType;
     }
 
     public ErrorType getErrorType() {
