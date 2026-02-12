@@ -17,7 +17,9 @@ public class LoggingAspect {
     private static final String CORRELATION_ID_HEADER = "X-Correlation-Id";
 
     // Pointcut pre controller (na kotre metody sa ma aplikovat
-    @Pointcut("execution(* sk.mvp.user_service.service..*(..))")
+    @Pointcut("execution(* sk.mvp.user_service.user.service.*(..)) || " +
+            "execution(* sk.mvp.user_service.auth.service.*(..)) || " +
+            "execution(* sk.mvp.user_service.admin.service.*(..))")
     public void serviceMethods() {}
 
     // Pred spustením

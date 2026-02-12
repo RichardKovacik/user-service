@@ -2,8 +2,12 @@ package sk.mvp.user_service;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.kafka.annotation.EnableKafka;
 
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = {
+		"sk.mvp.user_service", // tvoj hlavný projekt
+		"sk.mvp.common"        // balíček, kde je UserEventFactory v common module
+})
 public class UserServiceApplication {
 
 	public static void main(String[] args) {
