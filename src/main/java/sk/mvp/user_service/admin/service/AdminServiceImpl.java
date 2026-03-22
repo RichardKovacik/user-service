@@ -4,6 +4,8 @@ import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import sk.mvp.user_service.admin.dto.UserStatus;
+import sk.mvp.user_service.admin.dto.UserStatusUpdateReq;
 import sk.mvp.user_service.admin.dto.UserSummary;
 import sk.mvp.user_service.auth.service.ITokenService;
 import sk.mvp.user_service.common.exception.QApplicationException;
@@ -138,10 +140,15 @@ public class AdminServiceImpl implements IAdminService {
 
     @Override
     @Transactional
-    public void setUserEnabled(String username, boolean isEnabled) {
-        userRepository.setEnabled(username, isEnabled);
-        // remove actual user sessions
-        this.revokeTokens(username);
+    public void setUserStatus(Long userId, UserStatusUpdateReq req) {
+        boolean isEnabled = req.status() == UserStatus.ENABLED;
+        userRepository.setEnabled(userId, isEnabled);
+        // remove actual user sessions only if ist BLOCKED
+        if (!isEnabled) {
+            User user = userRepository.findById(userId).orElseThrow(() ->
+                    new QApplicationException("User with id " + userId + " not found", ErrorType.USER_NOT_FOUND, null));
+            this.revokeTokens(user.getUsername());
+        }
 
     }
 }

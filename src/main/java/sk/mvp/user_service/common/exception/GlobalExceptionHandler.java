@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -25,6 +26,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(QApplicationException.class)
     public ResponseEntity<QErrorResponse> handleCustomAplicationException(QApplicationException ex, HttpServletRequest request) {
         return createQErrorResponse(ex.getErrorType(), ex.getMessage(), request.getRequestURI(), ex.getData());
+    }
+
+    // handle custom application exceptions
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<QErrorResponse> handleInvalidInputRequest(HttpMessageNotReadableException ex, HttpServletRequest request) {
+        return createQErrorResponse(ErrorType.INPUT_VALIDATION_ERROR, ex.getMessage(), request.getRequestURI(), null);
     }
 
     // handle default runtime exceptions
@@ -54,6 +61,7 @@ public class GlobalExceptionHandler {
     private ResponseEntity<QErrorResponse> createQErrorResponse(ErrorType errorType, String message, String path,
                                                                 Map<String, Object> data) {
         QError QError = new QError(errorType, path, data);
+        QError.setMessage(message);
         return new ResponseEntity<>(new QErrorResponse(QError), new HttpHeaders(), QError.getStatusCode());
     }
 }

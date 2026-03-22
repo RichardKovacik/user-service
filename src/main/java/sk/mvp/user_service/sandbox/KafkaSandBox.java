@@ -12,7 +12,7 @@ import sk.mvp.user_service.async.producer.KafkaEventProducer;
 
 import java.util.UUID;
 
-@Component
+//@Component
 public class KafkaSandBox implements CommandLineRunner {
     private KafkaEventProducer kafkaEventProducer;
     private final KafkaTemplate<String, String> kafkaTemplate;

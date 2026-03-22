@@ -2,19 +2,12 @@ package sk.mvp.user_service.admin.controller;
 
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.session.SessionInformation;
-import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.web.bind.annotation.*;
-import sk.mvp.user_service.admin.dto.UserEnabledReq;
+import sk.mvp.user_service.admin.dto.UserStatusUpdateReq;
 import sk.mvp.user_service.admin.dto.UserSummary;
 import sk.mvp.user_service.admin.service.IAdminService;
-import sk.mvp.user_service.user.dto.UserProfile;
-import sk.mvp.user_service.user.service.IUserService;
-import sk.mvp.user_service.auth.service.IAuthService;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("api/admin")
@@ -30,10 +23,13 @@ public class AdminController {
         return ResponseEntity.ok().build();
     }
 
-    @PatchMapping(value = "/user/enable")
-    public ResponseEntity<?> setUserEnabled(@RequestParam String username,
-                                            @RequestBody @Valid UserEnabledReq userEnabledReq) {
-        adminService.setUserEnabled(username, userEnabledReq.enabled());
+    /*
+     set status of user BLOCKCKED, UNBLOCKED
+     */
+    @PatchMapping(value = "/users/{userId}/status")
+    public ResponseEntity<?> setUserStatus(@PathVariable(name = "userId") Long userId,
+                                            @RequestBody @Valid UserStatusUpdateReq userStatusUpdateReq) {
+        adminService.setUserStatus(userId, userStatusUpdateReq);
         return ResponseEntity.ok().build();
     }
 

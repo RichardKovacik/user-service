@@ -17,12 +17,17 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository <User, Long> {
     Optional<User> findByFirstName(String username);
     Optional<User> findByUsername(String username);
+    Optional<User> findById(Long id);
     @Query("select u from User u JOIN u.contact c where c.email = :email")
     Optional<User> findByEmail(@Param("email") String email);
 
     @Modifying
     @Query("update User u set u.enabled = :flag where u.username = :username")
     void setEnabled(@Param("username") String username, @Param("flag") boolean flag);
+
+    @Modifying
+    @Query("update User u set u.enabled = :flag where u.id = :userId")
+    void setEnabled(@Param("userId") Long userId, @Param("flag") boolean flag);
 
     @Query("select u.tokenVersion from User u where u.username = :username")
     Optional<Integer> getTokenVersion(@Param("username") String username);
