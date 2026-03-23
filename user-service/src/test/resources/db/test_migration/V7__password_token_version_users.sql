@@ -1,0 +1,4 @@
+ALTER TABLE users
+    ALTER COLUMN password TYPE VARCHAR(60);
+ALTER TABLE users
+    ADD COLUMN token_version INT NOT NULL DEFAULT 1;
