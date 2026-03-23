@@ -1,0 +1,66 @@
+package sk.mvp.common.factory;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import sk.mvp.common.event.BaseEvent;
+import sk.mvp.common.event.EventMetadata;
+import sk.mvp.common.event.EventType;
+import sk.mvp.common.payloads.PasswordResetPayload;
+import sk.mvp.common.payloads.UserRegisteredPayload;
+import org.slf4j.MDC;
+
+import java.time.Instant;
+import java.util.UUID;
+
+@Component
+@RequiredArgsConstructor
+public class UserEventFactory {
+    @Value("${spring.application.name}")
+    private String applicationName;
+
+    @Value("${app.events.version:1}")
+    private int eventVersion;
+
+    private static final String CORRELATION_ID_HEADER = "X-Correlation-Id";
+
+    public BaseEvent<UserRegisteredPayload> createUserRegisteredEvent(String email,
+                                                                      String link,
+                                                                      String userId) {
+        return BaseEvent.<UserRegisteredPayload>builder()
+                .eventId(UUID.randomUUID())
+                .createdAt(Instant.now())
+                .eventType(EventType.USER_REGITERED_EVENT.name())
+                .metadata(EventMetadata.builder()
+                        .correlationId(MDC.get(CORRELATION_ID_HEADER))
+                        .sourceService(applicationName)
+                        .build())
+                .eventVersion(eventVersion)
+                .userId(userId)
+                .payload(UserRegisteredPayload.builder()
+                        .email(email)
+                        .link(link)
+                        .build())
+                .build();
+    }
+
+    public BaseEvent<PasswordResetPayload> createPasswordChangeRequestedEvent(String email,
+                                                                            String link,
+                                                                            String userId) {
+        return BaseEvent.<PasswordResetPayload>builder()
+                .eventId(UUID.randomUUID())
+                .createdAt(Instant.now())
+                .eventType(EventType.PASSWORD_CHANGE_REQUESTED_EVENT.name())
+                .metadata(EventMetadata.builder()
+                        .correlationId(MDC.get(CORRELATION_ID_HEADER))
+                        .sourceService(applicationName)
+                        .build())
+                .eventVersion(eventVersion)
+                .userId(userId)
+                .payload(PasswordResetPayload.builder()
+                        .email(email)
+                        .link(link)
+                        .build())
+                .build();
+    }
+}

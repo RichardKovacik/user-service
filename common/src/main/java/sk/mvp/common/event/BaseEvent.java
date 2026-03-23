@@ -1,0 +1,20 @@
+package sk.mvp.common.event;
+
+import lombok.Builder;
+import lombok.extern.jackson.Jacksonized;
+
+import java.time.Instant;
+import java.util.UUID;
+
+
+@Builder
+@Jacksonized
+public record BaseEvent<T>(
+        UUID eventId,
+        String eventType,
+        int eventVersion,
+        Instant createdAt,
+        String userId,
+        EventMetadata metadata,
+        T payload
+) {}
