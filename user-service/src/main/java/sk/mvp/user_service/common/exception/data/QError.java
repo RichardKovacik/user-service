@@ -52,6 +52,7 @@ public class QError {
     public void initErrorMessage() {
         switch (this.errorType){
             case EMAIL_DUPLICATED -> this.message = "Email is already in use.";
+            case USERNAME_DUPLICATED -> this.message = "Username is already in use.";
             case TOO_MANY_REQUESTS -> this.message = "You have tried too many times, please try again later.";
             case USER_NOT_FOUND -> this.message = "User not found.";
             case AUTH_INVALID_CREDENTIALS -> this.message = "Invalid username or password.";

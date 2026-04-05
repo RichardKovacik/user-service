@@ -21,6 +21,9 @@ public interface UserRepository extends JpaRepository <User, Long> {
     @Query("select u from User u JOIN u.contact c where c.email = :email")
     Optional<User> findByEmail(@Param("email") String email);
 
+    @Query("select u from User u JOIN FETCH u.contact c where c.email = :email or u.username = :username")
+    Optional<User> findByEmailOrUsername(@Param("email") String email, @Param("username") String username);
+
     @Modifying
     @Query("update User u set u.enabled = :flag where u.username = :username")
     void setEnabled(@Param("username") String username, @Param("flag") boolean flag);

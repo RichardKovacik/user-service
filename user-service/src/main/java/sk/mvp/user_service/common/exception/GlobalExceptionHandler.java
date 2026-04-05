@@ -61,7 +61,10 @@ public class GlobalExceptionHandler {
     private ResponseEntity<QErrorResponse> createQErrorResponse(ErrorType errorType, String message, String path,
                                                                 Map<String, Object> data) {
         QError QError = new QError(errorType, path, data);
-        QError.setMessage(message);
+        if (message != null) {
+            QError.setMessage(message);
+        }
+
         return new ResponseEntity<>(new QErrorResponse(QError), new HttpHeaders(), QError.getStatusCode());
     }
 }

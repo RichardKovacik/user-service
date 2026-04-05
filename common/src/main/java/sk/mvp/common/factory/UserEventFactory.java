@@ -22,21 +22,22 @@ public class UserEventFactory {
     @Value("${app.events.version:1}")
     private int eventVersion;
 
-    private static final String CORRELATION_ID_HEADER = "X-Correlation-Id";
-
     public BaseEvent<UserRegisteredPayload> createUserRegisteredEvent(String email,
                                                                       String link,
-                                                                      String userId) {
+                                                                      String userId,
+                                                                      String correlationId,
+                                                                      String destinationTopic) {
         return BaseEvent.<UserRegisteredPayload>builder()
                 .eventId(UUID.randomUUID())
                 .createdAt(Instant.now())
                 .eventType(EventType.USER_REGITERED_EVENT.name())
                 .metadata(EventMetadata.builder()
-                        .correlationId(MDC.get(CORRELATION_ID_HEADER))
+                        .correlationId(correlationId)
                         .sourceService(applicationName)
                         .build())
                 .eventVersion(eventVersion)
                 .userId(userId)
+                .destinationTopic(destinationTopic)
                 .payload(UserRegisteredPayload.builder()
                         .email(email)
                         .link(link)
@@ -46,16 +47,19 @@ public class UserEventFactory {
 
     public BaseEvent<PasswordResetPayload> createPasswordChangeRequestedEvent(String email,
                                                                             String link,
-                                                                            String userId) {
+                                                                            String userId,
+                                                                              String correlationId,
+                                                                              String destinationTopic) {
         return BaseEvent.<PasswordResetPayload>builder()
                 .eventId(UUID.randomUUID())
                 .createdAt(Instant.now())
                 .eventType(EventType.PASSWORD_CHANGE_REQUESTED_EVENT.name())
                 .metadata(EventMetadata.builder()
-                        .correlationId(MDC.get(CORRELATION_ID_HEADER))
+                        .correlationId(correlationId)
                         .sourceService(applicationName)
                         .build())
                 .eventVersion(eventVersion)
+                .destinationTopic(destinationTopic)
                 .userId(userId)
                 .payload(PasswordResetPayload.builder()
                         .email(email)

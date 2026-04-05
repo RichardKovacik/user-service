@@ -1,6 +1,8 @@
 package sk.mvp.user_service.auth.service.impl;
 
 import jakarta.transaction.Transactional;
+import org.slf4j.MDC;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -8,6 +10,13 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import sk.mvp.common.event.BaseEvent;
+import sk.mvp.common.factory.UserEventFactory;
+import sk.mvp.common.payloads.UserRegisteredPayload;
+import sk.mvp.user_service.async.outbox.dto.OutboxDTO;
+import sk.mvp.user_service.async.outbox.service.IOutBoxService;
+import sk.mvp.user_service.async.outbox.service.OutBoxServiceImpl;
+import sk.mvp.user_service.async.producer.IEventProducer;
 import sk.mvp.user_service.auth.dto.RegistrationReq;
 import sk.mvp.user_service.auth.dto.VerificationTokenResponse;
 import sk.mvp.user_service.auth.service.IAuthService;
@@ -28,26 +37,40 @@ import sk.mvp.user_service.user.repository.UserRepository;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
 public class AuthServiceImpl implements IAuthService {
     private ITokenService jwtService;
     private AuthenticationManager authenticationManager;
+    //TODO: nelubi sa mi ze tu volam repository priamo
     private UserRepository userRepository;
     private IRedisService redisService;
     private IVerificationTokenService verificationTokenService;
+    private IEventProducer eventProducer;
+    private UserEventFactory userEventFactory;
+    private IOutBoxService outBoxService;
+    @Value("${kafka.user.event.topic}")
+    private String userEventTopicName;
+    private static final String CORRELATION_ID_HEADER = "X-Correlation-Id";
 
     public AuthServiceImpl(ITokenService jwtService,
                            AuthenticationManager authenticationManager,
                            UserRepository userRepository,
                            IRedisService redisService,
-                           IVerificationTokenService verificationTokenService) {
+                           IVerificationTokenService verificationTokenService,
+                           IEventProducer eventProducer,
+                           UserEventFactory userEventFactory,
+                           IOutBoxService outBoxService) {
         this.jwtService = jwtService;
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.redisService = redisService;
         this.verificationTokenService = verificationTokenService;
+        this.eventProducer = eventProducer;
+        this.userEventFactory = userEventFactory;
+        this.outBoxService = outBoxService;
     }
 
     @Override
@@ -116,8 +139,8 @@ public class AuthServiceImpl implements IAuthService {
             throw new IllegalArgumentException("Registration user data cannot be null");
         }
         //TODO: 2.check if it is email in good pattern using validator, regex ?? Bean validator
-        //1. check if email already exists
-        checkEmailIsNotUsed(registrationReq.getEmail());
+        //1. check if email and username is unique
+        isEmailOrUsernameUnique(registrationReq.getEmail(), registrationReq.getUsername());
 
         // create new instance of user
         Contact contact = new Contact(registrationReq.getEmail());
@@ -131,6 +154,23 @@ public class AuthServiceImpl implements IAuthService {
         User savedUser = userRepository.save(user);
         // save verificationToken to DB
         this.verificationTokenService.createVerificationToken(savedUser);
+        //Transactionl outbox pattern
+
+        // create registrationEnevent
+        BaseEvent<UserRegisteredPayload> userRegisteredEvent = this.userEventFactory.createUserRegisteredEvent(
+                registrationReq.getEmail(),
+                "link",
+                user.getId().toString(),
+                MDC.get(CORRELATION_ID_HEADER),
+                userEventTopicName);
+        //store is in Outbox_events db
+        outBoxService.saveOutbox(userRegisteredEvent);
+
+
+        //call asynch method thaht try to put new event in kafka broker
+        //asynch runs in separte thread, no blocking of tomcat request thread
+        //this.eventProducer.produce(userEventTopicName, registeredEvent);
+
         return new UserProfile(savedUser);
     }
 
@@ -168,11 +208,14 @@ public class AuthServiceImpl implements IAuthService {
     }
 
 
-    // check if emails is not used another user
-    private void checkEmailIsNotUsed(String email) {
-        Optional<User> user = userRepository.findByEmail(email);
-        if (user.isPresent()) {
-            throw new QApplicationException(String.format("Email %s is already in use", email), ErrorType.EMAIL_DUPLICATED, null);
-        }
+    private void isEmailOrUsernameUnique(String email, String username) {
+        userRepository.findByEmailOrUsername(email, username).ifPresent(user -> {
+            if (user.getContact().getEmail().equalsIgnoreCase(email)) {
+                throw new QApplicationException(null, ErrorType.EMAIL_DUPLICATED, null);
+            }
+            if (user.getUsername().equalsIgnoreCase(username)) {
+                throw new QApplicationException(null, ErrorType.USERNAME_DUPLICATED, null);
+            }
+        });
     }
 }

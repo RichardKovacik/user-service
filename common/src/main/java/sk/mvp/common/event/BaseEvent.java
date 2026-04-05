@@ -16,5 +16,6 @@ public record BaseEvent<T>(
         Instant createdAt,
         String userId,
         EventMetadata metadata,
+        String destinationTopic,
         T payload
 ) {}

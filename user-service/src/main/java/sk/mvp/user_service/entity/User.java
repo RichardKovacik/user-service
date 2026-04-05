@@ -7,6 +7,7 @@ import java.util.Set;
 @Entity
 @Table(name = "users")
 public class User {
+    //TODO: create iniq indexes and Optimicstic locking
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

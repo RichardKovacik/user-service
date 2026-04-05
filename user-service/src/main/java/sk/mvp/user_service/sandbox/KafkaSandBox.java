@@ -8,17 +8,18 @@ import sk.mvp.common.event.BaseEvent;
 import sk.mvp.common.factory.UserEventFactory;
 import sk.mvp.common.payloads.PasswordResetPayload;
 import sk.mvp.common.payloads.UserRegisteredPayload;
-import sk.mvp.user_service.async.producer.KafkaEventProducer;
+import sk.mvp.user_service.async.producer.IEventProducer;
+import sk.mvp.user_service.async.producer.KafkaIEventProducer;
 
 import java.util.UUID;
 
 //@Component
 public class KafkaSandBox implements CommandLineRunner {
-    private KafkaEventProducer kafkaEventProducer;
+    private IEventProducer kafkaEventProducer;
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final UserEventFactory userEventFactory;
 
-    public KafkaSandBox(KafkaEventProducer kafkaEventProducer, KafkaTemplate<String, String> kafkaTemplate, UserEventFactory userEventFactory) {
+    public KafkaSandBox(IEventProducer kafkaEventProducer, KafkaTemplate<String, String> kafkaTemplate, UserEventFactory userEventFactory) {
         this.kafkaEventProducer = kafkaEventProducer;
         this.kafkaTemplate = kafkaTemplate;
         this.userEventFactory = userEventFactory;
@@ -28,20 +29,22 @@ public class KafkaSandBox implements CommandLineRunner {
     public void run(String... args) throws Exception {
         String topic = "user-event-topic";
         String topic2 = "test-topic";
+        int counter = 0;
 
         while (true) {
 //            UserRegisteredEvent event = new UserRegisteredEvent("ferino@gmail.com", "123");
 //            PasswordChangeRequestedEvent event1 = new PasswordChangeRequestedEvent("555");
             MDC.put("X-Correlation-Id", UUID.randomUUID().toString());
 
+            counter++;
 
-            BaseEvent<UserRegisteredPayload> userRegisteredEvent = userEventFactory.
-                    createUserRegisteredEvent("feroo@gmail.com", "depp link", "idd usera");
-            BaseEvent<PasswordResetPayload> passwordChangeRequestedEvent = userEventFactory.
-                    createPasswordChangeRequestedEvent("janoo@gmail.com", "link password", "idd usera");
-
-            kafkaEventProducer.produce(topic, userRegisteredEvent);
-            kafkaEventProducer.produce(topic, passwordChangeRequestedEvent);
+//            BaseEvent<UserRegisteredPayload> userRegisteredEvent = userEventFactory.
+//                    createUserRegisteredEvent("feroo@gmail.com", "depp link", counter+"");
+//            BaseEvent<PasswordResetPayload> passwordChangeRequestedEvent = userEventFactory.
+//                    createPasswordChangeRequestedEvent("janoo@gmail.com", "link password", counter+"");
+//
+//            kafkaEventProducer.produce(topic, userRegisteredEvent);
+//            kafkaEventProducer.produce(topic, passwordChangeRequestedEvent);
             //kafkaTemplate.send(topic2,"Ahoj");
             //System.out.println("send");
 
