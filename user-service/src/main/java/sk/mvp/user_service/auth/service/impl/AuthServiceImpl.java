@@ -3,6 +3,8 @@ package sk.mvp.user_service.auth.service.impl;
 import jakarta.transaction.Transactional;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.actuate.info.ProcessInfoContributor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -14,6 +16,7 @@ import sk.mvp.common.event.BaseEvent;
 import sk.mvp.common.factory.UserEventFactory;
 import sk.mvp.common.payloads.UserRegisteredPayload;
 import sk.mvp.user_service.async.outbox.dto.OutboxDTO;
+import sk.mvp.user_service.async.outbox.dto.OutboxTriggerEvent;
 import sk.mvp.user_service.async.outbox.service.IOutBoxService;
 import sk.mvp.user_service.async.outbox.service.OutBoxServiceImpl;
 import sk.mvp.user_service.async.producer.IEventProducer;
@@ -48,29 +51,29 @@ public class AuthServiceImpl implements IAuthService {
     private UserRepository userRepository;
     private IRedisService redisService;
     private IVerificationTokenService verificationTokenService;
-    private IEventProducer eventProducer;
     private UserEventFactory userEventFactory;
     private IOutBoxService outBoxService;
     @Value("${kafka.user.event.topic}")
     private String userEventTopicName;
     private static final String CORRELATION_ID_HEADER = "X-Correlation-Id";
+    private final ApplicationEventPublisher eventPublisher;
 
     public AuthServiceImpl(ITokenService jwtService,
                            AuthenticationManager authenticationManager,
                            UserRepository userRepository,
                            IRedisService redisService,
                            IVerificationTokenService verificationTokenService,
-                           IEventProducer eventProducer,
                            UserEventFactory userEventFactory,
-                           IOutBoxService outBoxService) {
+                           IOutBoxService outBoxService,
+                           ApplicationEventPublisher eventPublisher) {
         this.jwtService = jwtService;
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.redisService = redisService;
         this.verificationTokenService = verificationTokenService;
-        this.eventProducer = eventProducer;
         this.userEventFactory = userEventFactory;
         this.outBoxService = outBoxService;
+        this.eventPublisher = eventPublisher;
     }
 
     @Override
@@ -165,6 +168,8 @@ public class AuthServiceImpl implements IAuthService {
                 userEventTopicName);
         //store is in Outbox_events db
         outBoxService.saveOutbox(userRegisteredEvent);
+        //produc internal spring event
+        eventPublisher.publishEvent(new OutboxTriggerEvent(userRegisteredEvent.eventId()));
 
 
         //call asynch method thaht try to put new event in kafka broker
