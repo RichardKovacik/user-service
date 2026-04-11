@@ -4,4 +4,5 @@ import sk.mvp.common.event.BaseEvent;
 
 public interface IEventProducer {
     void produce(String topic, BaseEvent<?> event);
+    boolean isBrokerUp();
 }

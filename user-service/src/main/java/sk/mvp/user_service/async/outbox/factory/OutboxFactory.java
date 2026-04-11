@@ -52,21 +52,6 @@ public class OutboxFactory {
         }
     }
 
-//    public OutboxEvent toEntity(OutboxDTO dto) {
-//        return OutboxEvent.builder()
-//                .eventId(dto.eventId())
-//                .correlationId(dto.correlationId())
-//                .eventType(dto.eventType())
-//                .aggregateId(dto.aggregateId())
-//                .payload(dto.payload())
-//                .destinationTopic(dto.destinationTopic())
-//                .status(dto.status())
-//                .retryCount(dto.retryCount())
-//                .nextRetryAt(dto.nextRetryAt())
-//                .createdAt(Instant.now()) // Set creation time during persist
-//                .build();
-//    }
-
     /**
      * It creates Outbox entity
      * bridge the Domain and Infrastructure layers.
@@ -85,7 +70,7 @@ public class OutboxFactory {
                     .destinationTopic(event.destinationTopic())
                     .status(OutBoxStatus.PENDING)
                     .retryCount(0)
-                    .nextRetryAt(Instant.now())
+                    .nextRetryAt(Instant.now().plusSeconds(60))
                     .createdAt(event.createdAt())
                     .build();
         } catch (JsonProcessingException e) {

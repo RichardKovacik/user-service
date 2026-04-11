@@ -4,12 +4,8 @@ import org.slf4j.MDC;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
-import sk.mvp.common.event.BaseEvent;
 import sk.mvp.common.factory.UserEventFactory;
-import sk.mvp.common.payloads.PasswordResetPayload;
-import sk.mvp.common.payloads.UserRegisteredPayload;
 import sk.mvp.user_service.async.producer.IEventProducer;
-import sk.mvp.user_service.async.producer.KafkaIEventProducer;
 
 import java.util.UUID;
 
@@ -31,10 +27,13 @@ public class KafkaSandBox implements CommandLineRunner {
         String topic2 = "test-topic";
         int counter = 0;
 
+        ;
+
+
         while (true) {
 //            UserRegisteredEvent event = new UserRegisteredEvent("ferino@gmail.com", "123");
 //            PasswordChangeRequestedEvent event1 = new PasswordChangeRequestedEvent("555");
-            MDC.put("X-Correlation-Id", UUID.randomUUID().toString());
+          //  MDC.put("X-Correlation-Id", UUID.randomUUID().toString());
 
             counter++;
 
@@ -48,6 +47,7 @@ public class KafkaSandBox implements CommandLineRunner {
             //kafkaTemplate.send(topic2,"Ahoj");
             //System.out.println("send");
 
+            System.out.println(kafkaEventProducer.isBrokerUp());
             Thread.sleep(5000); // 5 sekúnd
         }
 

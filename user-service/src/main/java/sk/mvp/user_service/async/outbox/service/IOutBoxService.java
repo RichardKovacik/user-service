@@ -10,7 +10,8 @@ import java.util.UUID;
 public interface IOutBoxService {
     <T>void saveOutbox(BaseEvent<T> event);
     <T> BaseEvent<T> findOutboxById(UUID id) throws OutboxNotFoundException;
-    int markAsProcessed(UUID id);
+    void markAsProcessed(UUID id);
+    <T> void processPendingOutboxEventsBatch(int batchSize);
 
 
 }
