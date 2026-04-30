@@ -10,9 +10,13 @@ CREATE TABLE users
     CONSTRAINT pk_users PRIMARY KEY (id)
 );
 
+
 -- onlly allow two genders F and M
 ALTER TABLE users
 ADD CONSTRAINT check_gender CHECK ( users.gender IN ('F', 'M') );
+
+ALTER TABLE users
+    ALTER COLUMN gender SET NOT NULL;
 -------------------------------------------
 --creating contact table + constraints
 CREATE TABLE contact

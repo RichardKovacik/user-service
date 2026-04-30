@@ -1,4 +1,4 @@
-package db.migration;
+package db.migration.dev;
 
 import org.flywaydb.core.api.migration.BaseJavaMigration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -6,7 +6,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
-public class V9__Hash_Plaintext_Passwords extends BaseJavaMigration {
+public class R__Hash_Plaintext_Passwords extends BaseJavaMigration {
 
     @Override
     public void migrate(org.flywaydb.core.api.migration.Context context) throws Exception {

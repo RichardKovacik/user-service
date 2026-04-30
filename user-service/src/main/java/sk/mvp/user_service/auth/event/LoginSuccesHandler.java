@@ -10,7 +10,7 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.stereotype.Component;
 import sk.mvp.common.CookieUtils;
 import sk.mvp.user_service.auth.dto.TokenPair;
-import sk.mvp.user_service.auth.dto.UserDetail;
+import sk.mvp.user_service.auth.dto.QUserDetail;
 import sk.mvp.user_service.auth.service.ITokenService;
 import sk.mvp.user_service.common.config.JwtConfig;
 import sk.mvp.user_service.common.constants.AuthConts;
@@ -33,12 +33,12 @@ public class LoginSuccesHandler implements AuthenticationSuccessHandler {
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
-        UserDetail userDetail = (UserDetail) authentication.getPrincipal();
-        String loginAttemptsKey = AuthConts.REDISS_AUTH_LOGIN_ATTEMPTS_USER_COLL + userDetail.getUsername();
+        QUserDetail QUserDetail = (QUserDetail) authentication.getPrincipal();
+        String loginAttemptsKey = AuthConts.REDISS_AUTH_LOGIN_ATTEMPTS_USER_COLL + QUserDetail.getUsername();
         // delete attemts counter in reddis
         redisService.delete(loginAttemptsKey);
         //generate token pair
-        TokenPair tokenPair = tokenService.generateTokenPair(userDetail);
+        TokenPair tokenPair = tokenService.generateTokenPair(QUserDetail);
         // send token to cookie
         //place refresh token in httopnly cookie
         ResponseCookie refreshCookie = CookieUtils.create("refresh_token",

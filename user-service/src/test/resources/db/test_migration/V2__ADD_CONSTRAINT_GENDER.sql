@@ -1,2 +1,0 @@
-ALTER TABLE users
-    ALTER COLUMN gender SET NOT NULL;

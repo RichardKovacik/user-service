@@ -45,7 +45,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             if (accessToken != null) {
                 // parse jet token a get user detail obejct from it
                 UserDetails userDetails = jwtService.getUserDetailFromAccessToken(accessToken);
-                jwtService.validateAccessToken(accessToken, userDetails);
+                jwtService.validateAccessToken(accessToken);
 
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                         userDetails,

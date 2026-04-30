@@ -1,4 +1,4 @@
-package sk.mvp.user_service.integration;
+package sk.mvp.user_service.integration.user;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
 import jakarta.transaction.Transactional;
@@ -9,67 +9,73 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import sk.mvp.user_service.TestContainerConfig;
+import sk.mvp.user_service.async.outbox.job.OutboxRealyJob;
+import sk.mvp.user_service.auth.service.impl.AuthServiceImpl;
 import sk.mvp.user_service.common.config.JwtConfig;
 import sk.mvp.user_service.common.exception.data.ErrorType;
 import sk.mvp.user_service.common.utils.JwtUtil;
 import sk.mvp.user_service.entity.User;
+import sk.mvp.user_service.integration.BaseIntegrationTest;
 import sk.mvp.user_service.user.dto.ContactResp;
 import sk.mvp.user_service.user.dto.UserProfile;
 import sk.mvp.user_service.user.repository.UserRepository;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
-@Import(TestContainerConfig.class)
-@ActiveProfiles("test")
+
 @Sql(scripts = "/data-test.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
-@AutoConfigureMockMvc(addFilters = false)
-public class UserProfileTest {
+public class UserProfileIT extends BaseIntegrationTest {
     @Autowired
     private MockMvc mockMvc;
     @Autowired
     private JwtConfig jwtConfig;
     @Autowired
     private UserRepository userRepository;
-    private User user;
-
-//    @Autowired
-//    private TokenServiceImpl tokenService;
-//    @Autowired
-//    private JwtConfig jwtConfig;
-//    @Autowired
-//    private UserServiceImpl userService;
 
 
-
-    private String accesToken;
-
-
-    // TODO: najskor jednoduchy potom parmetrizovany, potom unit testy
-    @Transactional
-    @ParameterizedTest
-    @ValueSource(strings = {"turb","mkovac"})
-    void shouldReturnUserProfileFromCookie(String username) throws Exception {
-        User user = userRepository.findByUsername(username).get();
-        String accesToken = JwtUtil.generateAccessToken(user.getUsername(),
+    // helper
+    private Cookie createAuthCookie(User user) {
+        String accessToken = JwtUtil.generateAccessToken(
+                user.getUsername(),
                 user.getTokenVersion(),
                 UUID.randomUUID().toString(),
                 user.getRolesAsString(),
                 jwtConfig.getAccesKey(),
                 jwtConfig.getAccesTokenExpiration()
-                );
-        Cookie cookie = new Cookie("access_token", accesToken);
+        );
+        return new Cookie("access_token", accessToken);
+    }
+
+    private static UserProfile createUpdateDto(String newFirst, String newLast, String newEmail, String newPhone) {
+        UserProfile dto = new UserProfile();
+        ReflectionTestUtils.setField(dto, "firstName", newFirst);
+        ReflectionTestUtils.setField(dto, "lastName", newLast);
+        ReflectionTestUtils.setField(dto, "contact", new ContactResp(newEmail, newPhone));
+        return dto;
+    }
+
+
+    // TODO: najskor jednoduchy potom parmetrizovany, potom unit testy
+    @Transactional
+    @ParameterizedTest
+    @ValueSource(strings = {"jdoe","fmoore"})
+    void shouldReturnUserProfileFromCookie(String username) throws Exception {
+        User user = userRepository.findByUsername(username).get();
+        Cookie cookie = createAuthCookie(user);
 
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/api/profile/get").cookie(cookie))
@@ -85,22 +91,14 @@ public class UserProfileTest {
     }
 
     //change profile data test
-    @Test
     @Transactional
-    void shouldChangeUserProfileData() throws Exception {
-        User user = userRepository.findByUsername("turb").get();
-        String accesToken = JwtUtil.generateAccessToken(user.getUsername(),
-                user.getTokenVersion(),
-                UUID.randomUUID().toString(),
-                user.getRolesAsString(),
-                jwtConfig.getAccesKey(),
-                jwtConfig.getAccesTokenExpiration()
-        );
-        Cookie cookie = new Cookie("access_token", accesToken);
+    @ParameterizedTest
+    @ValueSource(strings = {"jdoe"})
+    void shouldChangeUserProfileData(String username) throws Exception {
+        User user = userRepository.findByUsername(username).get();
+        Cookie cookie = createAuthCookie(user);
         //compose request
-        UserProfile req = new UserProfile();
-        req.setFirstName("Antonin");
-        req.setLastName("Novotny");
+        UserProfile req = createUpdateDto("newFirstName", "newLast", "newEmail", "0917547899");
         // DTO to JSON (Jackson ObjectMapper)
         ObjectMapper objectMapper = new ObjectMapper();
         String jsonBody = objectMapper.writeValueAsString(req);
@@ -113,27 +111,20 @@ public class UserProfileTest {
                 .andExpect(status().isOk());
         //fetch updated user from db and comapres values from request
 
-        User updatedUser = userRepository.findByUsername("turb").get();
+        User updatedUser = userRepository.findByUsername(username).get();
         Assertions.assertEquals(req.getFirstName(), updatedUser.getFirstName());
         Assertions.assertEquals(req.getLastName(), updatedUser.getLastName());
+        Assertions.assertEquals(req.getContact().email(), updatedUser.getContact().getEmail());
     }
 
     @Test
     @Transactional
-    void souldFailChangeUserPorfileDataWithExistingEmail() throws Exception {
-        User user = userRepository.findByUsername("turb").get();
-        String accesToken = JwtUtil.generateAccessToken(user.getUsername(),
-                user.getTokenVersion(),
-                UUID.randomUUID().toString(),
-                user.getRolesAsString(),
-                jwtConfig.getAccesKey(),
-                jwtConfig.getAccesTokenExpiration()
-        );
-        Cookie cookie = new Cookie("access_token", accesToken);
-        //compose request with exiting email
-        UserProfile req = new UserProfile();
-        ContactResp contactResp = new ContactResp("filip.toth@example.com", "+421917854789");
-        req.setContact(contactResp);
+    void shouldFailChangeUserPorfileDataWithExistingEmail() throws Exception {
+        User user = userRepository.findByUsername("gtaylor").get();
+        Cookie cookie = createAuthCookie(user);
+
+        //compose request
+        UserProfile req = createUpdateDto("gtaylor", "newLast", "jdoe@example.com", "0917547899");
         // DTO to JSON (Jackson ObjectMapper)
         ObjectMapper objectMapper = new ObjectMapper();
         String jsonBody = objectMapper.writeValueAsString(req);

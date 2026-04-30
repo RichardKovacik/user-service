@@ -1,7 +1,7 @@
 package sk.mvp.user_service.common.utils;
 
 import io.jsonwebtoken.*;
-import sk.mvp.user_service.auth.dto.UserDetail;
+import sk.mvp.user_service.auth.dto.QUserDetail;
 import sk.mvp.user_service.common.exception.InvalidTokenException;
 
 import javax.crypto.SecretKey;
@@ -39,14 +39,11 @@ public class JwtUtil {
                 .signWith(refreshKey, SignatureAlgorithm.HS256)
                 .compact();
     }
-    public static void validateAccessToken(String token, int expectedTokenVersion,SecretKey accessKey) throws JwtException {
-        try {
-            Claims claims = parseClaimsFromJwtToken(token, accessKey);
-            assertType(claims, "access_token");
-            assertTokenVersion(claims, expectedTokenVersion);
-        } catch (Exception e) {
-            throw new JwtException(e.getMessage());
-        }
+
+    public static void validateAccessToken(String token, int expectedTokenVersion, SecretKey accessKey) {
+        Claims claims = parseClaimsFromJwtToken(token, accessKey);
+        assertType(claims, "access_token");
+        assertTokenVersion(claims, expectedTokenVersion);
     }
 
     public static void validateRefreshToken(String token, SecretKey refreshKey) throws JwtException {
@@ -90,29 +87,21 @@ public class JwtUtil {
         return Duration.ofMillis(ttlMillis);
     }
 
-    public static UserDetail getUserDetailFromAccessToken(String token, SecretKey accessKey) throws InvalidTokenException {
-        UserDetail userDetail = null;
-        try {
-            Claims claims = parseClaimsFromJwtToken(token, accessKey);
+    public static QUserDetail getUserDetailFromAccessToken(String token, SecretKey accessKey)  {
+        QUserDetail QUserDetail = null;
+        Claims claims = parseClaimsFromJwtToken(token, accessKey);
 
-            return new UserDetail(
-                    claims.getSubject(),
-                    claims.get("roles", List.class));
-        }catch (Exception e) {
-            throw new InvalidTokenException(e.getMessage());
-        }
+        return new QUserDetail(
+                claims.getSubject(),
+                claims.get("roles", List.class));
     }
-    public static Claims parseClaimsFromJwtToken(String token, SecretKey secretKey) throws JwtException {
+    public static Claims parseClaimsFromJwtToken(String token, SecretKey secretKey) {
         Claims claims = null;
-        try {
             claims = Jwts.parserBuilder()
                     .setSigningKey(secretKey)
                     .build()
                     .parseClaimsJws(token)
                     .getBody();
-        }catch (Exception e) {
-            throw new JwtException(e.getMessage());
-        }
         return claims;
     }
 }

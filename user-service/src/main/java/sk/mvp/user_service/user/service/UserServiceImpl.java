@@ -15,12 +15,9 @@ import java.util.Optional;
 @Service
 public class UserServiceImpl implements IUserService {
     private UserRepository userRepository;
-    private RoleRepository roleRepository;
 
-    public UserServiceImpl(UserRepository userRepository,
-                           RoleRepository roleRepository) {
+    public UserServiceImpl(UserRepository userRepository) {
         this.userRepository = userRepository;
-        this.roleRepository = roleRepository;
     }
 
     @Override

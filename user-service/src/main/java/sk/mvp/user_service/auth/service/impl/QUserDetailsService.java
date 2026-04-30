@@ -5,10 +5,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import sk.mvp.user_service.auth.dto.UserDetail;
-import sk.mvp.user_service.common.constants.AuthConts;
+import sk.mvp.user_service.auth.dto.QUserDetail;
 import sk.mvp.user_service.common.exception.AccountLockedExp;
-import sk.mvp.user_service.common.reddis.IRedisService;
 import sk.mvp.user_service.user.repository.UserRepository;
 
 @Service
@@ -24,6 +22,6 @@ public class QUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException, AccountLockedExp {
         sk.mvp.user_service.entity.User user = userRepository.findByUsername(username).orElseThrow(() ->
                 new UsernameNotFoundException("Username not found"));
-        return new UserDetail(user);
+        return new QUserDetail(user);
     }
 }

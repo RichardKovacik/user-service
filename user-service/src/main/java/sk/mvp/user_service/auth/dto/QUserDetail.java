@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-public class UserDetail implements UserDetails {
+public class QUserDetail implements UserDetails {
     private long id;
     private String username;
     private String password;
@@ -19,12 +19,12 @@ public class UserDetail implements UserDetails {
     private boolean enabled;
     private boolean emailVerified;
 
-    public UserDetail(String username, List<String> roles) {
+    public QUserDetail(String username, List<String> roles) {
         this.username = username;
         this.authorities = mapRolesStringToAuthorities(roles);
     }
 
-    public UserDetail(User user) {
+    public QUserDetail(User user) {
         this.id = user.getId();
         this.username = user.getUsername();
         this.password = user.getPassword();
@@ -75,7 +75,7 @@ public class UserDetail implements UserDetails {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        UserDetail that = (UserDetail) o;
+        QUserDetail that = (QUserDetail) o;
         return id == that.id && Objects.equals(username, that.username);
     }
 

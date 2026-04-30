@@ -111,6 +111,7 @@ public class AuthController {
         return ResponseEntity.ok().build();
     }
 
+    //TODO: rview naming of rest api ednpoits url paths
     @PostMapping(value = "/registration")
     public UserProfile createUser(@RequestBody @Valid RegistrationReq registrationReq) {
         return authService.registerUser(registrationReq);

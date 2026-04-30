@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import sk.mvp.user_service.auth.service.ITokenService;
 import sk.mvp.user_service.common.config.JwtConfig;
 import sk.mvp.user_service.common.exception.data.ErrorType;
-import sk.mvp.user_service.auth.dto.UserDetail;
+import sk.mvp.user_service.auth.dto.QUserDetail;
 import sk.mvp.user_service.auth.dto.TokenPair;
 import sk.mvp.user_service.common.exception.QApplicationException;
 import sk.mvp.user_service.common.exception.InvalidTokenException;
@@ -87,29 +87,27 @@ public class TokenServiceImpl implements ITokenService {
                 .orElseThrow(() -> new QApplicationException("User with username " + userName + " not found", ErrorType.USER_NOT_FOUND, null));
 
         //generate new pairs and also add in reddis whotelist noew refresh token
-        return generateTokenPair(new UserDetail(user));
+        return generateTokenPair(new QUserDetail(user));
     }
 
     @Override
-    public UserDetail getUserDetailFromAccessToken(String accessToken) throws InvalidTokenException {
+    public QUserDetail getUserDetailFromAccessToken(String accessToken) {
        return JwtUtil.getUserDetailFromAccessToken(accessToken, jwtConfig.getAccesKey());
     }
 
     @Override
-    public void validateAccessToken(String accessToken, UserDetails userDetails) throws InvalidTokenException {
-        try {
-            int tokenVersion = getTokenVersion(userDetails.getUsername());
-            JwtUtil.validateAccessToken(accessToken, tokenVersion, jwtConfig.getAccesKey());
-            // validate if accesa token is in blacklist
-            Claims claims = JwtUtil.parseClaimsFromJwtToken(accessToken, jwtConfig.getAccesKey());
-            String key = "auth:access:blacklist:" + claims.getId();
-            if (redisService.has(key)) {
-                throw new QApplicationException("Access token is in blacklist. Possible security breach !!", ErrorType.TOKEN_REUSED_DETECTED, null);
-            }
-
-        }catch (Exception e) {
-            throw new InvalidTokenException(e.getMessage());
+    public void validateAccessToken(String accessToken) {
+        UserDetails userDetails = getUserDetailFromAccessToken(accessToken);
+        int tokenVersion = getTokenVersion(userDetails.getUsername());
+        JwtUtil.validateAccessToken(accessToken, tokenVersion, jwtConfig.getAccesKey());
+        // validate if accesa token is in blacklist
+        Claims claims = JwtUtil.parseClaimsFromJwtToken(accessToken, jwtConfig.getAccesKey());
+        String key = "auth:access:blacklist:" + claims.getId();
+        if (redisService.has(key)) {
+            throw new QApplicationException("Access token is in blacklist. Possible security breach !!", ErrorType.TOKEN_REUSED_DETECTED, null);
         }
+
+
     }
 
     @Override

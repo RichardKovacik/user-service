@@ -11,6 +11,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import sk.mvp.common.event.BaseEvent;
 import sk.mvp.common.factory.UserEventFactory;
@@ -29,19 +31,19 @@ import sk.mvp.user_service.auth.dto.LoginReq;
 import sk.mvp.user_service.auth.service.IVerificationTokenService;
 import sk.mvp.user_service.common.constants.AuthConts;
 import sk.mvp.user_service.common.exception.QApplicationException;
+import sk.mvp.user_service.common.exception.RoleNotFoundException;
 import sk.mvp.user_service.common.exception.data.ErrorType;
 import sk.mvp.user_service.common.reddis.IRedisService;
-import sk.mvp.user_service.entity.Contact;
-import sk.mvp.user_service.entity.Gender;
-import sk.mvp.user_service.entity.User;
-import sk.mvp.user_service.entity.VerificationToken;
+import sk.mvp.user_service.entity.*;
 import sk.mvp.user_service.user.dto.UserProfile;
+import sk.mvp.user_service.user.repository.RoleRepository;
 import sk.mvp.user_service.user.repository.UserRepository;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class AuthServiceImpl implements IAuthService {
@@ -49,6 +51,7 @@ public class AuthServiceImpl implements IAuthService {
     private AuthenticationManager authenticationManager;
     //TODO: nelubi sa mi ze tu volam repository priamo
     private UserRepository userRepository;
+    private RoleRepository roleRepository;
     private IRedisService redisService;
     private IVerificationTokenService verificationTokenService;
     private UserEventFactory userEventFactory;
@@ -57,6 +60,7 @@ public class AuthServiceImpl implements IAuthService {
     private String userEventTopicName;
     private static final String CORRELATION_ID_HEADER = "X-Correlation-Id";
     private final ApplicationEventPublisher eventPublisher;
+    private final PasswordEncoder passwordEncoder;
 
     public AuthServiceImpl(ITokenService jwtService,
                            AuthenticationManager authenticationManager,
@@ -65,7 +69,9 @@ public class AuthServiceImpl implements IAuthService {
                            IVerificationTokenService verificationTokenService,
                            UserEventFactory userEventFactory,
                            IOutBoxService outBoxService,
-                           ApplicationEventPublisher eventPublisher) {
+                           ApplicationEventPublisher eventPublisher,
+                           PasswordEncoder passwordEncoder,
+                           RoleRepository roleRepository) {
         this.jwtService = jwtService;
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
@@ -74,6 +80,8 @@ public class AuthServiceImpl implements IAuthService {
         this.userEventFactory = userEventFactory;
         this.outBoxService = outBoxService;
         this.eventPublisher = eventPublisher;
+        this.passwordEncoder = passwordEncoder;
+        this.roleRepository = roleRepository;
     }
 
     @Override
@@ -148,18 +156,21 @@ public class AuthServiceImpl implements IAuthService {
         // create new instance of user
         Contact contact = new Contact(registrationReq.getEmail());
         User user = new User(registrationReq.getUsername(),
-                registrationReq.getPassword(),
+                passwordEncoder.encode(registrationReq.getPassword()),
                 contact,
                 Gender.getValidGenderFromCode(registrationReq.getGenderCodeAsCharacter()));
         //set user to new contact
         contact.setUser(user);
+        //set default role to user
+        Role role = roleRepository.findByName("USER").orElseThrow(() -> new RoleNotFoundException("Role USER not found"));
+        user.setRoles(Set.of(role));
         // save user to DB
         User savedUser = userRepository.save(user);
         // save verificationToken to DB
         this.verificationTokenService.createVerificationToken(savedUser);
         //Transactionl outbox pattern
 
-        // create registrationEnevent
+        // create registrationEvent
         BaseEvent<UserRegisteredPayload> userRegisteredEvent = this.userEventFactory.createUserRegisteredEvent(
                 registrationReq.getEmail(),
                 "link",

@@ -2,12 +2,12 @@
 ALTER TABLE users
     ADD username VARCHAR(255);
 
--- fill username default value from  email
-UPDATE users u
-SET username = SUBSTRING(c.email FROM 1 FOR 5)
-FROM contact c
-WHERE u.id = c.user_id
-  AND u.username IS NULL;
+-- -- fill username default value from  email
+-- UPDATE users u
+-- SET username = SUBSTRING(c.email FROM 1 FOR 5)
+-- FROM contact c
+-- WHERE u.id = c.user_id
+--   AND u.username IS NULL;
 
 
 ALTER TABLE users

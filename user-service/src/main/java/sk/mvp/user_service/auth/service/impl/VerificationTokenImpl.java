@@ -12,6 +12,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.UUID;
 
+
 @Service
 public class VerificationTokenImpl implements IVerificationTokenService {
     private VerificationTokenRepository repository;

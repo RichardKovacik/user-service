@@ -32,6 +32,7 @@ public class UserProfile implements Serializable {
         }
     }
 
+
     public String getUsername() {
         return username;
     }
