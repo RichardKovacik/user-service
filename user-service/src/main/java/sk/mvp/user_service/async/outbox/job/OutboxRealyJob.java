@@ -6,7 +6,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import sk.mvp.user_service.async.outbox.service.IOutBoxService;
 
-@Component
+//@Component
 @Slf4j
 @RequiredArgsConstructor
 public class OutboxRealyJob {

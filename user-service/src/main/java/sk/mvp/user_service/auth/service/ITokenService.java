@@ -1,5 +1,6 @@
 package sk.mvp.user_service.auth.service;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import org.springframework.security.core.userdetails.UserDetails;
 import sk.mvp.user_service.auth.dto.QUserDetail;
@@ -28,9 +29,9 @@ public interface ITokenService {
      * @return
      * @throws InvalidTokenException
      */
-    QUserDetail getUserDetailFromAccessToken(String accessToken) throws JwtException, InvalidTokenException;
+    QUserDetail getUserDetailFromAccessToken(String accessToken);
 
-    void validateAccessToken(String accessToken) throws InvalidTokenException;
+    Claims validateAccessToken(String accessToken);
 
     /**
      * add acces token to redis blacklist

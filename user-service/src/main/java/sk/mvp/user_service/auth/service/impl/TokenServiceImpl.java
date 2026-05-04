@@ -96,17 +96,19 @@ public class TokenServiceImpl implements ITokenService {
     }
 
     @Override
-    public void validateAccessToken(String accessToken) {
-        UserDetails userDetails = getUserDetailFromAccessToken(accessToken);
-        int tokenVersion = getTokenVersion(userDetails.getUsername());
-        JwtUtil.validateAccessToken(accessToken, tokenVersion, jwtConfig.getAccesKey());
-        // validate if accesa token is in blacklist
+    public Claims validateAccessToken(String accessToken) {
         Claims claims = JwtUtil.parseClaimsFromJwtToken(accessToken, jwtConfig.getAccesKey());
+        String username = claims.getSubject();
+
+        int tokenVersion = getTokenVersion(username);
+        JwtUtil.validateAccessToken(claims, accessToken, tokenVersion);
+
+        // validate if accesa token is in blacklist
         String key = "auth:access:blacklist:" + claims.getId();
         if (redisService.has(key)) {
             throw new QApplicationException("Access token is in blacklist. Possible security breach !!", ErrorType.TOKEN_REUSED_DETECTED, null);
         }
-
+        return claims;
 
     }
 

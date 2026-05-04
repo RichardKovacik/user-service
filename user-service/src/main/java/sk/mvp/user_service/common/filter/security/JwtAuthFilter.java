@@ -1,5 +1,10 @@
 package sk.mvp.user_service.common.filter.security;
 
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -7,24 +12,30 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.util.WebUtils;
 import sk.mvp.user_service.auth.service.ITokenService;
+import sk.mvp.user_service.common.exception.QApplicationException;
 
 import java.io.IOException;
 
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
     private ITokenService jwtService;
+    private HandlerExceptionResolver resolver;
     private static final Logger log =
             LoggerFactory.getLogger(JwtAuthFilter.class);
 
-    public JwtAuthFilter(ITokenService jwtService) {
+    public JwtAuthFilter(ITokenService jwtService,
+                         @Qualifier("handlerExceptionResolver")HandlerExceptionResolver handlerExceptionResolver) {
        this.jwtService = jwtService;
+       this.resolver = handlerExceptionResolver;
     }
 
     @Override
@@ -44,8 +55,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
             if (accessToken != null) {
                 // parse jet token a get user detail obejct from it
-                UserDetails userDetails = jwtService.getUserDetailFromAccessToken(accessToken);
                 jwtService.validateAccessToken(accessToken);
+                UserDetails userDetails = jwtService.getUserDetailFromAccessToken(accessToken);
+
 
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                         userDetails,
@@ -56,8 +68,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
             }
         } catch (Exception e) {
-            log.warn("Invalid JWT token: {}", e.getMessage());
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            resolver.resolveException(request, response, null, e);
             return;
         }
 

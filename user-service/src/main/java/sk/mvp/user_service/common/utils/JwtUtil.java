@@ -3,6 +3,8 @@ package sk.mvp.user_service.common.utils;
 import io.jsonwebtoken.*;
 import sk.mvp.user_service.auth.dto.QUserDetail;
 import sk.mvp.user_service.common.exception.InvalidTokenException;
+import sk.mvp.user_service.common.exception.QApplicationException;
+import sk.mvp.user_service.common.exception.data.ErrorType;
 
 import javax.crypto.SecretKey;
 import java.time.Duration;
@@ -40,31 +42,27 @@ public class JwtUtil {
                 .compact();
     }
 
-    public static void validateAccessToken(String token, int expectedTokenVersion, SecretKey accessKey) {
-        Claims claims = parseClaimsFromJwtToken(token, accessKey);
+    public static void validateAccessToken(Claims claims, String token, int expectedTokenVersion) {
         assertType(claims, "access_token");
         assertTokenVersion(claims, expectedTokenVersion);
     }
 
-    public static void validateRefreshToken(String token, SecretKey refreshKey) throws JwtException {
-        try {
-            Claims claims = parseClaimsFromJwtToken(token, refreshKey);
-            assertType(claims, "refresh_token");
-        } catch (Exception e) {
-            throw new JwtException(e.getMessage());
-        }
+    public static void validateRefreshToken(String token, SecretKey refreshKey) {
+        Claims claims = parseClaimsFromJwtToken(token, refreshKey);
+        assertType(claims, "refresh_token");
+
     }
 
     private static void assertType(Claims claims, String expected) {
         String type = claims.get("type", String.class);
         if (!expected.equals(type)) {
-            throw new JwtException("Invalid token type");
+            throw new QApplicationException("Token Invalid", ErrorType.TOKEN_INVALID, null);
         }
     }
     private static void assertTokenVersion(Claims claims, int expectedVersion) {
         int tokenVersion = claims.get("version", Integer.class);
         if (tokenVersion != expectedVersion) {
-            throw new JwtException("Token version mismatch");
+            throw new QApplicationException("Token version mismatch", ErrorType.TOKEN_INVALID, null);
         }
     }
 

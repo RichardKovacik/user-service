@@ -1,5 +1,9 @@
 package sk.mvp.user_service.common.exception;
 
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +25,19 @@ import java.util.Map;
 @ControllerAdvice
 public class GlobalExceptionHandler {
     private static final Logger log = LoggerFactory.getLogger(LoggingFilter.class);
+
+    //handle authorization JWT token exceptions
+    // 1. CHYBY TOKENU (Expirácia, podpis, formát) -> 401 Unauthorized
+    @ExceptionHandler({
+            ExpiredJwtException.class,
+            SignatureException.class,
+            MalformedJwtException.class,
+            UnsupportedJwtException.class,
+    })
+    public ResponseEntity<QErrorResponse> handleAuthenticationExceptions(Exception e, HttpServletRequest request) {
+        log.warn("Authentication failed: {}", e.getMessage());
+        return createQErrorResponse(ErrorType.TOKEN_INVALID, e.getMessage(), request.getRequestURI(), null);
+    }
 
     // handle custom application exceptions
     @ExceptionHandler(QApplicationException.class)
