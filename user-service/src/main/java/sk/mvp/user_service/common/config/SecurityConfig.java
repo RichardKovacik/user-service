@@ -75,11 +75,11 @@ public class SecurityConfig {
     @Bean
     public QUsernamePasswordAuthFilter qUsernamePasswordAuthFilter(
             AuthenticationManager authenticationManager,
-            AuthenticationFailureHandler successHandler,
-            AuthenticationSuccessHandler failureHandler,
+            AuthenticationFailureHandler failureHandler,
+            AuthenticationSuccessHandler successHandler,
             ObjectMapper objectMapper,
             IRedisService redisService) {
-        return new QUsernamePasswordAuthFilter(authenticationManager, failureHandler, successHandler, objectMapper, redisService
+        return new QUsernamePasswordAuthFilter(authenticationManager, successHandler, failureHandler, objectMapper, redisService
         );
     }
     @Bean
