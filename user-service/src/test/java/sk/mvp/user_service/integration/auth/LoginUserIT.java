@@ -93,6 +93,7 @@ public class LoginUserIT extends BaseIntegrationTest {
 
     @ParameterizedTest
     @MethodSource("provideBadCredetials")
+    @Transactional
     void shouldFailLoginWhenInvalidCredentials(String username, String password) throws Exception {
         LoginReq loginReq = new LoginReq(username, password);
         String jsonBody = objectMapper.writeValueAsString(loginReq);
