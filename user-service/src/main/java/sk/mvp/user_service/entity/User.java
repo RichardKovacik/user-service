@@ -136,6 +136,15 @@ public class User {
                 .map(Role::getName)
                 .toArray(String[]::new);
     }
+    //Spring security prefix
+    public String[] getRolesAsStringWithPrefix() {
+        return this.getRoles().stream()
+                .map(role -> {
+                    String name = role.getName();
+                    return name.startsWith("ROLE_") ? name : "ROLE_" + name;
+                })
+                .toArray(String[]::new);
+    }
 
     public int getTokenVersion() {
         return tokenVersion;

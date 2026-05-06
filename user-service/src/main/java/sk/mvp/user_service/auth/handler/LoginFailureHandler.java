@@ -1,4 +1,4 @@
-package sk.mvp.user_service.auth.event;
+package sk.mvp.user_service.auth.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;

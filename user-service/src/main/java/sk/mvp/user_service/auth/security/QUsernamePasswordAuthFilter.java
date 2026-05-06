@@ -1,4 +1,4 @@
-package sk.mvp.user_service.common.filter.security;
+package sk.mvp.user_service.auth.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;

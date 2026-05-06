@@ -22,11 +22,11 @@ public class TestContainerConfig {
         );
     }
 
-//    @Bean
-//    @ServiceConnection
-//    GenericContainer<?> reddisContainer() {
-//        return new RedisContainer(
-//                DockerImageName.parse("redis:7")
-//        );
-//    }
+    @Bean
+    @ServiceConnection(name = "redis")
+    RedisContainer redisContainer() {
+        return new RedisContainer(
+                DockerImageName.parse("redis:7")
+        );
+    }
 }

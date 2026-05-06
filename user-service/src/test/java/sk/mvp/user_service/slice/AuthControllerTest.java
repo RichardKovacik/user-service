@@ -1,6 +1,5 @@
 package sk.mvp.user_service.slice;
 import org.junit.jupiter.api.Test;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -17,13 +16,12 @@ import sk.mvp.user_service.auth.dto.RegistrationReq;
 import sk.mvp.user_service.auth.service.IAuthService;
 import sk.mvp.user_service.common.config.JwtConfig;
 import sk.mvp.user_service.common.exception.data.ErrorType;
-import sk.mvp.user_service.common.filter.security.JwtAuthFilter;
+import sk.mvp.user_service.auth.security.JwtAuthFilter;
 import sk.mvp.user_service.user.dto.ContactResp;
 import sk.mvp.user_service.user.dto.UserProfile;
 
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;

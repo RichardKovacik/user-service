@@ -37,7 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
-@Sql(scripts = "/data-test.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
+//@Sql(scripts = "/data-test.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
 public class UserProfileIT extends BaseIntegrationTest {
     @Autowired
     private MockMvc mockMvc;
@@ -53,7 +53,7 @@ public class UserProfileIT extends BaseIntegrationTest {
                 user.getUsername(),
                 user.getTokenVersion(),
                 UUID.randomUUID().toString(),
-                user.getRolesAsString(),
+                user.getRolesAsStringWithPrefix(),
                 jwtConfig.getAccesKey(),
                 jwtConfig.getAccesTokenExpiration()
         );
@@ -79,6 +79,7 @@ public class UserProfileIT extends BaseIntegrationTest {
 
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/api/profile/get").cookie(cookie))
+                .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.username").value(user.getUsername()))
                 .andExpect(jsonPath("$.firstName").value(user.getFirstName()))

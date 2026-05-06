@@ -1,10 +1,5 @@
-package sk.mvp.user_service.common.filter.security;
+package sk.mvp.user_service.auth.security;
 
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.UnsupportedJwtException;
-import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -21,7 +16,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.util.WebUtils;
 import sk.mvp.user_service.auth.service.ITokenService;
-import sk.mvp.user_service.common.exception.QApplicationException;
 
 import java.io.IOException;
 

@@ -1,6 +1,7 @@
 package sk.mvp.user_service.common.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,17 +20,17 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
 import sk.mvp.user_service.auth.service.impl.QUserDetailsService;
-import sk.mvp.user_service.common.filter.security.JwtAuthFilter;
-import sk.mvp.user_service.common.filter.security.QUsernamePasswordAuthFilter;
+import sk.mvp.user_service.auth.security.JwtAuthFilter;
+import sk.mvp.user_service.auth.security.QUsernamePasswordAuthFilter;
 import sk.mvp.user_service.common.reddis.IRedisService;
-
-import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
     private QUserDetailsService qUserDetailsService;
     private JwtAuthFilter jwtAuthFilter;
+    @Value("${app.security.require-https:true}")
+    private boolean requireHttps;
 
     public SecurityConfig(QUserDetailsService qUserDetailsService,
                           JwtAuthFilter jwtAuthFilter) {
@@ -69,7 +70,9 @@ public class SecurityConfig {
         // Add the JWT Token filter before the UsernamePasswordAuthenticationFilter
                 http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
                 http.addFilterAt(qUsernamePasswordAuthFilter, UsernamePasswordAuthenticationFilter.class);
-        http.requiresChannel(channel -> channel.anyRequest().requiresSecure());
+        if (requireHttps) {
+            http.requiresChannel(channel -> channel.anyRequest().requiresSecure());
+        }
         return http.build();
     }
     @Bean

@@ -14,7 +14,7 @@ import sk.mvp.user_service.auth.service.impl.AuthServiceImpl;
 @SpringBootTest
 @Import(TestContainerConfig.class)
 @ActiveProfiles("test")
-@AutoConfigureMockMvc(addFilters = false)
+@AutoConfigureMockMvc
 public abstract class BaseIntegrationTest {
     @MockBean
     OutboxRealyJob realyJob;
